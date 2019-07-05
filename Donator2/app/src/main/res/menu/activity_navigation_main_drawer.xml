@@ -26,11 +26,11 @@
             android:title="@string/request" />
         <item
             android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/profile"
             android:title="@string/profile" />
         <item
             android:id="@+id/nav_friends"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/friends2"
             android:title="@string/friends" />
 
         <item
