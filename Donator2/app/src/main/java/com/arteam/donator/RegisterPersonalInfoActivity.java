@@ -150,7 +150,7 @@ public class RegisterPersonalInfoActivity extends AppCompatActivity  implements 
     public void onClick(View v) {
         if(v.getId() == R.id.constraintRegisterPersonalInfo){
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
         }
     }
 

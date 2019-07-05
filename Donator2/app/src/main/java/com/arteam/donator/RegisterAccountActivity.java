@@ -144,7 +144,7 @@ public class RegisterAccountActivity extends AppCompatActivity implements View.O
     public void onClick(View v) {
         if(v.getId() == R.id.constraintRegister){
             InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+            inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
         }
     }
 
