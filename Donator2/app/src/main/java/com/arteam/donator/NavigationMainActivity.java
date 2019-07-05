@@ -1,8 +1,11 @@
 package com.arteam.donator;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -13,9 +16,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class NavigationMainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private FirebaseAuth mAuth;
+    FragmentManager fragmentManager =getSupportFragmentManager();
+    private FirebaseFirestore firebaseFirestore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,14 +34,9 @@ public class NavigationMainActivity extends AppCompatActivity
         setContentView(R.layout.activity_navigation_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+
+
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -38,6 +44,14 @@ public class NavigationMainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        mAuth = FirebaseAuth.getInstance();
+
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.nav_main, new RankingFragment())
+                .commit();
     }
 
     @Override
@@ -45,8 +59,6 @@ public class NavigationMainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 
@@ -64,8 +76,12 @@ public class NavigationMainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            mAuth.signOut();
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
+        }else if(id == R.id.action_profile) {
+
             return true;
         }
 
@@ -79,19 +95,38 @@ public class NavigationMainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_home) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_tools) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_ranking) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.nav_main, new RankingFragment())
+                    .commit();
+        } else if (id == R.id.nav_donate) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.nav_main, new DonateFragment())
+                    .commit();
+        } else if (id == R.id.nav_necessary) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.nav_main, new NecessaryFragment())
+                    .commit();
+        } else if (id == R.id.nav_map) {
+            Toast.makeText(this, "MAPA", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_request) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.nav_main, new RequestFragment())
+                    .commit();
+        } else if (id == R.id.nav_profile) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.nav_main, new ProfileFragment())
+                    .commit();
+        } else if (id == R.id.nav_friends) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.nav_main, new FriendsFragment())
+                    .commit();
+        } else if (id == R.id.nav_logout) {
+            mAuth.signOut();
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
         }
+
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

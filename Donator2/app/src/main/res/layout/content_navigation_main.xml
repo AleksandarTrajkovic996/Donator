@@ -8,4 +8,14 @@
     tools:context=".NavigationMainActivity"
     tools:showIn="@layout/app_bar_navigation_main">
 
+    <FrameLayout
+        android:id="@+id/nav_main"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+    </FrameLayout>
 </android.support.constraint.ConstraintLayout>
