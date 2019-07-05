@@ -55,6 +55,7 @@
     <string name="profile">Profile</string>
     <string name="friends">Friends</string>
     <string name="logout">Log out</string>
+    <string name="cancelBtn">Cancel</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

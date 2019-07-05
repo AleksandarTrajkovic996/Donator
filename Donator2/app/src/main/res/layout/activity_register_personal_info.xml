@@ -140,7 +140,7 @@
             android:gravity="center"
             android:onClick="cancelRegistration"
             android:padding="10dp"
-            android:text="@string/btnCancel"
+            android:text="@string/cancelBtn"
             android:textColor="#ffffff"
             android:textSize="20sp" />
     </LinearLayout>

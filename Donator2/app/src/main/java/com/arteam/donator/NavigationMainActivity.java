@@ -35,8 +35,6 @@ public class NavigationMainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -45,9 +43,7 @@ public class NavigationMainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
-
         mAuth = FirebaseAuth.getInstance();
-
 
         fragmentManager.beginTransaction()
                 .replace(R.id.nav_main, new RankingFragment())
@@ -87,7 +83,6 @@ public class NavigationMainActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
