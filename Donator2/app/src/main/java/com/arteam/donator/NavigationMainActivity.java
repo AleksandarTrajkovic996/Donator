@@ -2,6 +2,7 @@ package com.arteam.donator;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
@@ -16,15 +17,21 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class NavigationMainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseAuth mAuth;
+    private TextView fullNameNavigationMain;
+    private TextView emailNavigationMain;
     FragmentManager fragmentManager =getSupportFragmentManager();
     private FirebaseFirestore firebaseFirestore;
 
@@ -42,12 +49,53 @@ public class NavigationMainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setCheckedItem(R.id.nav_ranking);
 
         mAuth = FirebaseAuth.getInstance();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
+        NavigationView nv = (NavigationView) findViewById(R.id.nav_view);
+        View hView =  nv.getHeaderView(0);
+
+
+        fullNameNavigationMain = hView.findViewById(R.id.fullNameTxt);
+        emailNavigationMain = hView.findViewById(R.id.emailNavigationMainTxt);
+
+
+        emailNavigationMain.setText(mAuth.getCurrentUser().getEmail());
 
         fragmentManager.beginTransaction()
                 .replace(R.id.nav_main, new RankingFragment())
                 .commit();
+
+        this.fillData();
+    }
+
+    private void fillData(){
+        String userID = mAuth.getUid();
+
+
+        firebaseFirestore.collection("Users").document(userID).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                        if(task.isSuccessful()){
+
+                            if(task.getResult().exists()){
+
+                                String firstNameTmp = task.getResult().getString("first_name");
+                                String lastNameTmp = task.getResult().getString("last_name");
+
+                                 fullNameNavigationMain.setText(firstNameTmp + " " + lastNameTmp);
+                            }else{
+
+                                Toast.makeText(NavigationMainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
+
+                            }
+                        }
+                    }
+                });
     }
 
     @Override

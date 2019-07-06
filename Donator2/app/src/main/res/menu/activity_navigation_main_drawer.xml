@@ -26,7 +26,7 @@
             android:title="@string/request" />
         <item
             android:id="@+id/nav_profile"
-            android:icon="@drawable/profile"
+            android:icon="@drawable/profilna_slika"
             android:title="@string/profile" />
         <item
             android:id="@+id/nav_friends"

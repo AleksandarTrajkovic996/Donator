@@ -56,6 +56,11 @@
     <string name="friends">Friends</string>
     <string name="logout">Log out</string>
     <string name="cancelBtn">Cancel</string>
+    <string name="addPhotoProfile">Add profile photo</string>
+    <string name="editConfirm">Edit</string>
+    <string name="donatedProducts">Donated:  </string>
+    <string name="receivedProducts">Received:  </string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
