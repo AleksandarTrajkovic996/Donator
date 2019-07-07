@@ -3,10 +3,13 @@ package com.arteam.donator;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -100,6 +103,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data, viewGroup, false);
         context = viewGroup.getContext();
 
+        imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
@@ -135,8 +139,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
 
             }
         });
-
-
 
 
         final Map<String, String> articleForAdd = new HashMap<>();
@@ -212,6 +214,19 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                             txtSize.setText(article.getSize());
                                             txtDescription.setText(article.getDescription());
 
+                                            storageReference.child("article_images/" + articleId).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                                @Override
+                                                public void onSuccess(byte[] bytes) {
+                                                    byte[] bytesImg = bytes;
+                                                    if(bytes!=null) {
+                                                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                                        imageViewDonate.setImageBitmap(bm);
+                                                    }else{
+                                                        imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                                    }
+                                                }
+                                            }) ;
+
                                             relativeLayout.setVisibility(View.VISIBLE);
                                             linearLayout2.setVisibility(View.INVISIBLE);
                                             linearLayout3.setVisibility(View.VISIBLE);
@@ -233,6 +248,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                     btnOk2.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
                             relativeLayout.setVisibility(View.INVISIBLE);
                             linearLayout2.setVisibility(View.INVISIBLE);
                             linearLayout3.setVisibility(View.INVISIBLE);

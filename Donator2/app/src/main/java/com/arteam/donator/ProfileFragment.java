@@ -37,6 +37,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener, View.OnKeyListener {
@@ -53,6 +56,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
     private TextView numberDonatedProducts;
     private TextView numberReceivedProducts;
     private TextView phoneNumber;
+    private TextView clickToAdd;
     private FirebaseAuth mAuth;
     private Button btnCancel;
     private Button btnEdit;
@@ -62,6 +66,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
     private StorageReference storageReference;
     private Uri imageUri = null;
     private byte[] bytesProfile = null;
+    private String userID = null;
 
     @Nullable
     @Override
@@ -74,7 +79,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         storageReference = storage.getReference();
         final NavigationView navigationView = getActivity().findViewById(R.id.nav_view);
 
-
+        clickToAdd = view.findViewById(R.id.addPhotoTxt);
         layoutPhoto = view.findViewById(R.id.layoutPhotoProfile);
         layoutProfileInfo = view.findViewById(R.id.layoutProfileInformation);
         firstName = view.findViewById(R.id.firstNameProfileTxt);
@@ -96,14 +101,29 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
         Bundle bundle = getArguments();
         if(bundle != null) {
+
             bytesProfile = bundle.getByteArray("profileImg");
-            Bitmap bm = BitmapFactory.decodeByteArray(bytesProfile, 0, bytesProfile.length);
-            DisplayMetrics dm = new DisplayMetrics();
-            getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
-            profilePhoto.setImageBitmap(bm);
+            userID = bundle.getString("userID");
+            if(bytesProfile!=null) {
+                Bitmap bm = BitmapFactory.decodeByteArray(bytesProfile, 0, bytesProfile.length);
+                DisplayMetrics dm = new DisplayMetrics();
+                getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
+                profilePhoto.setImageBitmap(bm);
+            }
+
+            if(userID!=null){
+                this.fillData(userID);
+                clickToAdd.setVisibility(View.INVISIBLE);
+                btnEdit.setVisibility(View.INVISIBLE);
+            }
         }
 
-        this.fillData();
+        if(userID==null){
+            this.fillData(mAuth.getCurrentUser().getUid());
+            clickToAdd.setVisibility(View.VISIBLE);
+            btnEdit.setVisibility(View.VISIBLE);
+        }
+
 
         numberDonatedProducts.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,57 +160,55 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
 
 
-        btnEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        if(userID==null) {
 
-                if(validation()) {
-                    String userID = mAuth.getCurrentUser().getUid();
+            btnEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-                    firebaseFirestore.collection("Users").document(userID)
-                            .update("first_name", firstName.getText().toString(), "last_name",
-                                    lastName.getText().toString(), "address", address.getText().toString(), "phone_number", phoneNumber.getText().toString());
+                    if (validation()) {
+                        String userID = mAuth.getCurrentUser().getUid();
 
-                    writeImageOnStorage();
-                    startActivity(new Intent(getActivity(), NavigationMainActivity.class));
-                    getActivity().finish();
+                        firebaseFirestore.collection("Users").document(userID)
+                                .update("first_name", firstName.getText().toString(), "last_name",
+                                        lastName.getText().toString(), "address", address.getText().toString(), "phone_number", phoneNumber.getText().toString());
+
+                        writeImageOnStorage();
+                        startActivity(new Intent(getActivity(), NavigationMainActivity.class));
+                        getActivity().finish();
+                    }
                 }
-            }
-        });
+            });
 
 
+            addPhotoTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (ActivityCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(
+                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                2000);
+                    } else {
+                        pickFromGallery();
+                    }
+                }
+            });
 
-        addPhotoTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(ActivityCompat.checkSelfPermission(getActivity(),
-                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                {
-                    requestPermissions(
-                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                            2000);
+            profilePhoto.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (ActivityCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(
+                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                2000);
+                    } else {
+                        pickFromGallery();
+                    }
                 }
-                else {
-                    pickFromGallery();
-                }
-            }
-        });
-
-        profilePhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(ActivityCompat.checkSelfPermission(getActivity(),
-                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                {
-                    requestPermissions(
-                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                            2000);
-                }
-                else {
-                    pickFromGallery();
-                }
-            }
-        });
+            });
+        }
 
         return view;
     }
@@ -220,11 +238,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
     }
 
-    private void fillData(){
-        String userID = mAuth.getUid();
+    private void fillData(String user_id){
+       // String userID = mAuth.getUid();
 
 
-            firebaseFirestore.collection("Users").document(userID).get()
+            firebaseFirestore.collection("Users").document(user_id).get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
