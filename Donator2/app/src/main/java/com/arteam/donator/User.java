@@ -2,7 +2,7 @@ package com.arteam.donator;
 
 
 
-public class User {
+public class User extends UserID {
 
     private String first_name;
     private String last_name;
