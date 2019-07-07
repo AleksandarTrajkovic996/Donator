@@ -108,8 +108,6 @@ public class DonateFragment extends Fragment {
                     }
                 });
 
-
-
         return view;
     }
 
