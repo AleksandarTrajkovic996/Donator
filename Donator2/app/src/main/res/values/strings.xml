@@ -60,10 +60,14 @@
     <string name="editConfirm">Edit</string>
     <string name="donatedProducts">Donated:  </string>
     <string name="receivedProducts">Received:  </string>
+    <string name="search">Search</string>
+    <string name="searchLocation">Search Location Here</string>
+
 
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_donate">DonateActivity</string>
     <string name="title_activity_necessary">NecessaryActivity</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

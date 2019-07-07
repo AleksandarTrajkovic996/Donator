@@ -19,7 +19,6 @@ public class FriendsFragment extends Fragment {
 
 
 
-
         return view;
     }
 
