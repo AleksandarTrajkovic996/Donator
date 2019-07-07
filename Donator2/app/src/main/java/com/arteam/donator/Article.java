@@ -2,38 +2,47 @@ package com.arteam.donator;
 
 public class Article extends ArticleID {
 
-    public String tip, naziv, velicina;
+    public String type, name, size, description;
 
     public Article(){
     }
 
-    public Article(String tip, String naziv, String velicina) {
-        this.tip = tip;
-        this.naziv = naziv;
-        this.velicina = velicina;
+    public Article(String type, String name, String size, String description) {
+        this.type = type;
+        this.name = name;
+        this.size = size;
+        this.description = description;
     }
 
-    public String getTip() {
-        return tip;
+    public String getType() {
+        return type;
     }
 
-    public void setTip(String tip) {
-        this.tip = tip;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getNaziv() {
-        return naziv;
+    public String getName() {
+        return name;
     }
 
-    public void setNaziv(String naziv) {
-        this.naziv = naziv;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getVelicina() {
-        return velicina;
+    public String getSize() {
+        return size;
     }
 
-    public void setVelicina(String velicina) {
-        this.velicina = velicina;
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
