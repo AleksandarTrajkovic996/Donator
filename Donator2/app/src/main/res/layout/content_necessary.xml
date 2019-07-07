@@ -8,4 +8,15 @@
     tools:context=".NecessaryFragment"
     tools:showIn="@layout/fragment_necessary">
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/listArticleRecycler"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="#95d85b"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </android.support.constraint.ConstraintLayout>

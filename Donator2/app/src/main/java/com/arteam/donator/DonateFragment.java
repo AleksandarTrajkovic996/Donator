@@ -74,7 +74,7 @@ public class DonateFragment extends Fragment {
 
 
 
-        articleRecycler = new ArticleRecycler(listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3);
+        articleRecycler = new ArticleRecycler(listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3, "donate");
 
 
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
@@ -88,21 +88,18 @@ public class DonateFragment extends Fragment {
                         int i = 0;
                         for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
                             if (doc.getType() == DocumentChange.Type.ADDED) {
-                                //       Article konkurs = doc.getDocument().toObject(Article.class);
-                                //       listArticles.add(konkurs);
 
-                                //       vlasnikKonkursRecycler.notifyDataSetChanged();
-                                //       String tip = doc.getDocument().getString("tip");
-                                //      String zaposljen = doc.getDocument().getString("zaposljen");
-                                // if (tip.matches("radnik") && zaposljen.matches("ne")) {
+
 
                                 String articleID = doc.getDocument().getId();
                                 Article article = doc.getDocument().toObject(Article.class).withId(articleID, i);
-                                listArticles.put(i, article);
-                                i++;
-                                articleRecycler.notifyDataSetChanged();
 
-                                // }
+                                if(article.getType().matches("donate")){
+                                      listArticles.put(i, article);
+                                      i++;
+                                      articleRecycler.notifyDataSetChanged();
+
+                                }
                             }
                         }
                     }

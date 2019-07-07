@@ -43,9 +43,10 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     private LinearLayout linearLayout3;
     private LinearLayout linearLayout2;
     private boolean relLayoutActive;
+    private String type;
 
 
-    public ArticleRecycler(Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3) {
+    public ArticleRecycler(Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3, String type) {
         this.list = listArticles;
         this.relativeLayout = relAddArticle;
         this.txtName = txtName;
@@ -58,6 +59,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         this.linearLayout3 = lin3;
         this.linearLayout2 = lin2;
         this.fab = fab;
+        this.type = type;
     }
 
     @NonNull
@@ -108,7 +110,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                 articleForAdd.put("name", txtName.getText().toString()); //vlasnikov id
                 articleForAdd.put("size", txtSize.getText().toString());
                 articleForAdd.put("description", txtDescription.getText().toString());
-                articleForAdd.put("type", "donate");
+                articleForAdd.put("type", type);
 
 
                 firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").add(articleForAdd)
