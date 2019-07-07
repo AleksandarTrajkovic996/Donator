@@ -44,7 +44,6 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
 
-
         return new UserRecycler.ViewHolder(view);
     }
 
@@ -71,52 +70,6 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
                         .replace(R.id.nav_main, profileFragment)
                         .commit();
 
-//                if(!relLayoutActive){
-//
-//                    firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(articleId).get()
-//                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//                                @Override
-//                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//
-//                                    if (task.isSuccessful()) {
-//
-//                                        if (task.getResult().exists()) {
-//
-//                                            Article article = task.getResult().toObject(Article.class);
-//
-//                                            txtName.setText(article.getName());
-//                                            txtSize.setText(article.getSize());
-//                                            txtDescription.setText(article.getDescription());
-//
-//                                            relativeLayout.setVisibility(View.VISIBLE);
-//                                            linearLayout2.setVisibility(View.INVISIBLE);
-//                                            linearLayout3.setVisibility(View.VISIBLE);
-//                                            relLayoutActive = true;
-//                                        } else {
-//
-//                                        }
-//
-//                                    } else {
-//
-//                                    }
-//
-//
-//                                }
-//                            });
-//
-//
-//
-//                    btnOk2.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View v) {
-//                            relativeLayout.setVisibility(View.INVISIBLE);
-//                            linearLayout2.setVisibility(View.INVISIBLE);
-//                            linearLayout3.setVisibility(View.INVISIBLE);
-//                            relLayoutActive=false;
-//                        }
-//                    });
-//
-//                }
             }
         });
 

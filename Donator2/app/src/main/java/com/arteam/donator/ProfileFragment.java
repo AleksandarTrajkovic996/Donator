@@ -51,7 +51,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
     private EditText firstName;
     private EditText lastName;
     private EditText address;
-    private TextView email;
     private TextView addPhotoTextView;
     private TextView numberDonatedProducts;
     private TextView numberReceivedProducts;
@@ -85,7 +84,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         firstName = view.findViewById(R.id.firstNameProfileTxt);
         lastName = view.findViewById(R.id.lastNameProfileTxt);
         address = view.findViewById(R.id.addressProfileTxt);
-        email = view.findViewById(R.id.emailProfileTxt);
         phoneNumber = view.findViewById(R.id.phoneNumberProfileTxt);
         btnCancel = view.findViewById(R.id.btnCancelEditProfile);
         btnEdit = view.findViewById(R.id.btnEditProfile);
@@ -94,7 +92,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         numberDonatedProducts = view.findViewById(R.id.numberDonatedProducts);
         numberReceivedProducts = view.findViewById(R.id.numberReceivedProducts);
 
-        email.setText(mAuth.getCurrentUser().getEmail());
         layoutPhoto.setOnClickListener(this);
         layoutProfileInfo.setOnClickListener(this);
         phoneNumber.setOnKeyListener(this);
@@ -114,23 +111,47 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
             if(userID!=null){
                 this.fillData(userID);
                 clickToAdd.setVisibility(View.INVISIBLE);
+                btnCancel.setVisibility(View.INVISIBLE);
                 btnEdit.setVisibility(View.INVISIBLE);
+                firstName.setEnabled(false);
+                lastName.setEnabled(false);
+                address.setEnabled(false);
+                phoneNumber.setEnabled(false);
             }
         }
 
         if(userID==null){
             this.fillData(mAuth.getCurrentUser().getUid());
             clickToAdd.setVisibility(View.VISIBLE);
+            btnCancel.setVisibility(View.VISIBLE);
             btnEdit.setVisibility(View.VISIBLE);
+            firstName.setEnabled(true);
+            lastName.setEnabled(true);
+            address.setEnabled(true);
+            phoneNumber.setEnabled(true);
         }
 
 
         numberDonatedProducts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String idTmp = "";
+
+                if(userID == null){
+                     idTmp = mAuth.getUid();
+                }else{
+                    idTmp = userID;
+                }
+
+                Bundle bundle = new Bundle();
+                bundle.putString("userID", idTmp);
+                bundle.putString("type", "donated");
+                DonateFragment donateFragment = new DonateFragment();
+                donateFragment.setArguments(bundle);
+
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, new DonateFragment())
+                        .replace(R.id.nav_main, donateFragment)
                         .commit();
                 navigationView.setCheckedItem(R.id.nav_donate);
             }
@@ -139,14 +160,30 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         numberReceivedProducts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String idTmp = "";
+
+                if(userID == null){
+                    idTmp = mAuth.getUid();
+                }else{
+                    idTmp = userID;
+                }
+
+                Bundle bundle = new Bundle();
+                bundle.putString("userID", idTmp);
+                bundle.putString("type", "received");
+                DonateFragment donateFragment = new DonateFragment();
+                donateFragment.setArguments(bundle);
+
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, new DonateFragment())
+                        .replace(R.id.nav_main, donateFragment)
                         .commit();
                 navigationView.setCheckedItem(R.id.nav_donate);
             }
         });
 
+
+        if(userID==null) {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -157,10 +194,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
                 navigationView.setCheckedItem(R.id.nav_ranking);
             }
         });
-
-
-
-        if(userID==null) {
 
             btnEdit.setOnClickListener(new View.OnClickListener() {
                 @Override

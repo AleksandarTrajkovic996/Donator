@@ -103,7 +103,9 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data, viewGroup, false);
         context = viewGroup.getContext();
 
-        imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+        if(imageViewDonate != null) {
+            imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+        }
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
@@ -120,79 +122,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         final String name = list.get(position).getName();
 
         holder.setTxtDisplay(name);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if(!relLayoutActive){
-                    txtName.setText("");
-                    txtSize.setText("");
-                    txtDescription.setText("");
-                    imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
-                    relativeLayout.setVisibility(View.VISIBLE);
-                    linearLayout2.setVisibility(View.VISIBLE);
-                    linearLayout3.setVisibility(View.INVISIBLE);
-                    relLayoutActive = true;
-                }
-
-
-            }
-        });
-
-
-        final Map<String, String> articleForAdd = new HashMap<>();
-        btnOk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                articleForAdd.put("name", txtName.getText().toString());
-                articleForAdd.put("size", txtSize.getText().toString());
-                articleForAdd.put("description", txtDescription.getText().toString());
-                articleForAdd.put("type", type);
-
-                Random generator = new Random();
-                StringBuilder randomStringBuilder = new StringBuilder();
-                int randomLength = generator.nextInt((15 - 10) + 1) + 10;
-                char tempChar;
-                for (int i = 0; i < randomLength; i++){
-                    tempChar = (char) (generator.nextInt(96) + 32);
-                    randomStringBuilder.append(tempChar);
-                }
-                String tmp = randomStringBuilder.toString();
-
-                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(tmp).set(articleForAdd)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-
-                            }
-                        });
-
-                if(imageUri != null)
-                {
-                    StorageReference ref = storageReference.child("article_images/" + tmp);
-                    ref.putFile(imageUri);
-                }
-
-
-                relativeLayout.setVisibility(View.INVISIBLE);
-                linearLayout2.setVisibility(View.INVISIBLE);
-                linearLayout3.setVisibility(View.INVISIBLE);
-                relLayoutActive=false;
-                imageUri = null;
-            }
-        });
-
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
-                relativeLayout.setVisibility(View.INVISIBLE);
-                linearLayout2.setVisibility(View.INVISIBLE);
-                linearLayout3.setVisibility(View.INVISIBLE);
-                relLayoutActive=false;
-            }
-        });
 
         holder.one_data.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,23 +143,28 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                             txtSize.setText(article.getSize());
                                             txtDescription.setText(article.getDescription());
 
-                                            storageReference.child("article_images/" + articleId).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                                @Override
-                                                public void onSuccess(byte[] bytes) {
-                                                    byte[] bytesImg = bytes;
-                                                    if(bytes!=null) {
-                                                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                                        imageViewDonate.setImageBitmap(bm);
-                                                    }else{
-                                                        imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                            if(article.getType().matches("donate")) {
+                                                imageViewDonate.setEnabled(false);
+                                                storageReference.child("article_images/" + articleId).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                                                    @Override
+                                                    public void onSuccess(byte[] bytes) {
+                                                        byte[] bytesImg = bytes;
+                                                        if (bytes != null) {
+                                                            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                                                            imageViewDonate.setImageBitmap(bm);
+                                                        } else {
+                                                            imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                                        }
                                                     }
-                                                }
-                                            }) ;
-
+                                                });
+                                            }
                                             relativeLayout.setVisibility(View.VISIBLE);
                                             linearLayout2.setVisibility(View.INVISIBLE);
                                             linearLayout3.setVisibility(View.VISIBLE);
                                             relLayoutActive = true;
+                                            txtName.setEnabled(false);
+                                            txtSize.setEnabled(false);
+                                            txtDescription.setEnabled(false);
                                         } else {
 
                                         }
@@ -243,12 +177,17 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                 }
                             });
 
-
-
                     btnOk2.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+
+                            if(imageViewDonate != null) {
+                                imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                imageViewDonate.setEnabled(true);
+                            }
+                            txtName.setEnabled(true);
+                            txtSize.setEnabled(true);
+                            txtDescription.setEnabled(true);
                             relativeLayout.setVisibility(View.INVISIBLE);
                             linearLayout2.setVisibility(View.INVISIBLE);
                             linearLayout3.setVisibility(View.INVISIBLE);
