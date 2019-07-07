@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -113,7 +114,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ArticleRecycler.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ArticleRecycler.ViewHolder holder, int position) {
 
         final String articleId = list.get(position).articleID;
 
@@ -122,7 +123,22 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
 
         holder.setTxtDisplay(name, size);
 
-        holder.txtDisplayName.setOnClickListener(new View.OnClickListener() {
+            if(!list.get(position).getType().matches("necessary") ) {
+        storageReference.child("article_images/" + articleId).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                byte[] bytesImg = bytes;
+                if (bytes != null) {
+                    Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    holder.imageViewArticle.setImageBitmap(bm);
+                } else {
+                    holder.imageViewArticle.setImageResource(R.drawable.hand_heart_donate_icon);
+                }
+            }
+        });
+    }
+
+        holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(!relLayoutActive){
@@ -142,21 +158,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                             txtSize.setText(article.getSize());
                                             txtDescription.setText(article.getDescription());
 
-                                            if(!article.getType().matches("necessary") ) {
-                                                imageViewDonate.setEnabled(false);
-                                                storageReference.child("article_images/" + articleId).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                                                    @Override
-                                                    public void onSuccess(byte[] bytes) {
-                                                        byte[] bytesImg = bytes;
-                                                        if (bytes != null) {
-                                                            Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                                            imageViewDonate.setImageBitmap(bm);
-                                                        } else {
-                                                            imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
-                                                        }
-                                                    }
-                                                });
-                                            }
+
                                             relativeLayout.setVisibility(View.VISIBLE);
                                             linearLayout2.setVisibility(View.INVISIBLE);
                                             linearLayout3.setVisibility(View.VISIBLE);
@@ -213,14 +215,16 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         private TextView txtDisplayName;
         private View view;
         private TextView txtDisplaySize;
-
+        private ImageView imageViewArticle;
 
         @SuppressLint("ResourceType")
         public ViewHolder(View itemView) {
             super(itemView);
 
             view = itemView;
+            txtDisplayName = view.findViewById(R.id.txtDisplayName);
             txtDisplaySize = (TextView) view.findViewById(R.id.txtDisplaySize);
+            imageViewArticle = (ImageView) view.findViewById(R.id.imageViewDisplayArticle);
         }
 
 

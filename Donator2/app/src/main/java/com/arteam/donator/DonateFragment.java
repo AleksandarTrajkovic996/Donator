@@ -231,7 +231,6 @@ public class DonateFragment extends Fragment {
                                     listArticles.put(i, article);
                                     i++;
                                     articleRecycler.notifyDataSetChanged();
-
                                 }
                             }
                         }
