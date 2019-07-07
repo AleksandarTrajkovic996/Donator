@@ -1,17 +1,40 @@
 package com.arteam.donator;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Map;
+
 public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHolder> {
+
+
+    private Context context;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore firebaseFirestore;
+
+
+
+    private Map<Integer,User> list;
+
     @NonNull
     @Override
     public RequestRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        return null;
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data_user, viewGroup, false);
+        context = viewGroup.getContext();
+
+        mAuth = FirebaseAuth.getInstance();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
+        return new RequestRecycler.ViewHolder(view);
     }
 
     @Override
@@ -21,7 +44,7 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
 
     @Override
     public int getItemCount() {
-        return 0;
+            return list.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
