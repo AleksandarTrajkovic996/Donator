@@ -100,9 +100,14 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     @NonNull
     @Override
     public ArticleRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data, viewGroup, false);
-        context = viewGroup.getContext();
-
+        View view = null;
+        if(type.matches("donate")) {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data, viewGroup, false);
+            context = viewGroup.getContext();
+        }else if(type.matches("necessary")){
+             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data_necessary, viewGroup, false);
+            context = viewGroup.getContext();
+        }
         if(imageViewDonate != null) {
             imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
         }
@@ -120,10 +125,11 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         final String articleId = list.get(position).articleID;
 
         final String name = list.get(position).getName();
+        final String size = list.get(position).getSize();
 
-        holder.setTxtDisplay(name);
+        holder.setTxtDisplay(name, size);
 
-        holder.one_data.setOnClickListener(new View.OnClickListener() {
+        holder.txtDisplayName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(!relLayoutActive){
@@ -143,7 +149,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                             txtSize.setText(article.getSize());
                                             txtDescription.setText(article.getDescription());
 
-                                            if(article.getType().matches("donate")) {
+                                            if(!article.getType().matches("necessary") ) {
                                                 imageViewDonate.setEnabled(false);
                                                 storageReference.child("article_images/" + articleId).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                                                     @Override
@@ -211,9 +217,9 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder{
 
 
-        private TextView txtDisplay;
+        private TextView txtDisplayName;
         private View view;
-        private TextView one_data;
+        private TextView txtDisplaySize;
 
 
         @SuppressLint("ResourceType")
@@ -221,15 +227,17 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
             super(itemView);
 
             view = itemView;
-            one_data = (TextView) view.findViewById(R.id.txtDisplay);
+            txtDisplaySize = (TextView) view.findViewById(R.id.txtDisplaySize);
         }
 
 
-        public void setTxtDisplay(String txt){
+        public void setTxtDisplay(String txt, String size){
 
-            txtDisplay = view.findViewById(R.id.txtDisplay);
+            txtDisplayName = view.findViewById(R.id.txtDisplayName);
+            txtDisplaySize = (TextView) view.findViewById(R.id.txtDisplaySize);
 
-            txtDisplay.setText(txt);
+            txtDisplaySize.setText(size);
+            txtDisplayName.setText(txt);
         }
     }
 }
