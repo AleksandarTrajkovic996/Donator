@@ -216,6 +216,7 @@ public class DonateFragment extends Fragment {
     }
 
     private void fillData(String uID, final String type){ //mAuth.getCurrentUser().getUid()
+
         firebaseFirestore.collection("Users/" + uID + "/Articles")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override

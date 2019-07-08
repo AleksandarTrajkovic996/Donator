@@ -56,6 +56,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     private StorageReference storageReference;
 
 
+
     public ArticleRecycler(ImageView imageDonate, Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3, String type) {
         this.imageUri = null;
         this.imageViewDonate = imageDonate;

@@ -33,8 +33,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -273,8 +277,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
     }
 
     private void fillData(String user_id){
-       // String userID = mAuth.getUid();
-
 
             firebaseFirestore.collection("Users").document(user_id).get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -285,15 +287,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
                         if(task.getResult().exists()){
 
-                            String firstNameTmp = task.getResult().getString("first_name");
-                            String lastNameTmp = task.getResult().getString("last_name");
-                            String addressTmp = task.getResult().getString("address");
-                            String phoneNumberTmp = task.getResult().getString("phone_number");
+                            User user = task.getResult().toObject(User.class);
 
-                            firstName.setText(firstNameTmp);
-                            lastName.setText(lastNameTmp);
-                            address.setText(addressTmp);
-                            phoneNumber.setText(phoneNumberTmp);
+                            firstName.setText(user.getFirst_name());
+                            lastName.setText(user.getLast_name());
+                            address.setText(user.getAddress());
+                            phoneNumber.setText(user.getPhone_number());
 
                         }else{
 
@@ -304,17 +303,25 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
                 }
             });
 
-
-            firebaseFirestore.collection("Users/" + user_id + "/Articles").get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            firebaseFirestore.collection("Users/" + user_id + "/Articles").whereEqualTo("type", "donated")
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
 
-
-
+                            int i = queryDocumentSnapshots.size();
+                            numberDonatedProducts.setText("Donated:" + i);
                         }
                     });
 
+            firebaseFirestore.collection("Users/" + user_id + "/Articles").whereEqualTo("type", "received")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
+
+                        int i = queryDocumentSnapshots.size();
+                        numberReceivedProducts.setText("Received:" + i);
+                    }
+                });
     }
 
     public boolean validation(){
