@@ -125,6 +125,91 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id="@+id/relViewArticle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:background="#d1eff9"
+        android:theme="@style/Theme.AppCompat.Light.Dialog"
+        android:visibility="invisible"
+        tools:ignore="MissingConstraints">
+
+        <EditText
+            android:id="@+id/txtDesc2"
+            android:layout_width="fill_parent"
+            android:layout_height="120dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/border"
+            android:ems="10"
+            android:gravity="top|left"
+            android:hint="@string/Description"
+            android:inputType="textMultiLine"
+            android:lines="3"
+            android:textColorHint="@android:color/black"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/linOfferCancel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtDesc2"
+            android:layout_marginTop="16dp"
+            android:background="@android:drawable/bottom_bar"
+            android:orientation="horizontal"
+            android:paddingLeft="4.0dip"
+            android:paddingTop="5.0dip"
+            android:paddingRight="4.0dip"
+            android:paddingBottom="1.0dip"
+            android:visibility="invisible">
+
+            <Button
+                android:id="@+id/btnOffer"
+                android:layout_width="0.0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight="1.0"
+                android:text="str-offer" />
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="0.0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight="1.0"
+                android:text="@string/btnCancel" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linOk"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtDesc2"
+            android:layout_marginTop="16dp"
+            android:background="@android:drawable/bottom_bar"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingLeft="4.0dip"
+            android:paddingTop="5.0dip"
+            android:paddingRight="4.0dip"
+            android:paddingBottom="1.0dip"
+            android:visibility="invisible">
+
+            <Button
+                android:id="@+id/btnOk"
+                android:layout_width="200dp"
+                android:layout_height="fill_parent"
+                android:layout_centerHorizontal="true"
+                android:text="@string/btnOk" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"

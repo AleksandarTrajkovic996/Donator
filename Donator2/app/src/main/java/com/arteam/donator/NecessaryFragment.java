@@ -51,6 +51,17 @@ public class NecessaryFragment extends Fragment {
     private boolean relLayoutActive;
 
 
+
+    private boolean relViewLayoutActive;
+    private Button btnOffer;
+    private Button btnOk3;
+    private Button btnCancel2;
+    private TextView txtDescription2;
+    private LinearLayout linearLayout4;
+    private LinearLayout linearLayout5;
+    private RelativeLayout relViewArticle;
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -68,16 +79,26 @@ public class NecessaryFragment extends Fragment {
         linearLayout2 = view.findViewById(R.id.lin2);
         fab = view.findViewById(R.id.fab);
 
+        relViewLayoutActive = false; // novo!!!
+        btnOffer = view.findViewById(R.id.btnOffer);//offer kad trazimo iz necije liste za doniranje - novo!!!
+        btnOk3 = view.findViewById(R.id.btnOk);//ok kad se prikazuje samo - novo!!!
+        btnCancel2 = view.findViewById(R.id.btnCancel);//cancel kad trazimo iz necije liste za doniranje - novo!!!
+        txtDescription2 = view.findViewById(R.id.txtDesc2);//description kada se otvara za pregled samo - novo!!!
+        linearLayout4 = view.findViewById(R.id.linOfferCancel);//ask i cancel kad pregledavamo kod trugog nekog - novo!!!
+        linearLayout5 = view.findViewById(R.id.linOk);//ok kad se prikazuje samo - novo!!!
+        relViewArticle = view.findViewById(R.id.relViewArticle); //novo!!!
+
+
 
         recyclerView = view.findViewById(R.id.listArticleRecycler);
-
 
         listArticles = new HashMap<>();
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore= FirebaseFirestore.getInstance();
 
 
-        articleRecycler = new ArticleRecycler(listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3, "necessary");
+        articleRecycler = new ArticleRecycler(listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3,
+                        relViewArticle, linearLayout4, linearLayout5, btnOffer, btnOk3, btnCancel2, txtDescription2,"necessary");
 
 
 
@@ -113,7 +134,20 @@ public class NecessaryFragment extends Fragment {
             }
         });
 
-        firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles")
+        String userID=null;
+        final String userID1;
+        String userType;
+        Bundle bundle = getArguments();
+        if(bundle!=null){
+            userID = bundle.getString("userID");
+            userID1 = userID;
+            userType = bundle.getString("type");
+        }else {
+            userID = mAuth.getUid();
+            userID1 = userID;
+        }
+
+        firebaseFirestore.collection("Users/" + userID + "/Articles")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
@@ -126,6 +160,7 @@ public class NecessaryFragment extends Fragment {
                                 if(article.getType().matches("necessary")){
                                     listArticles.put(i, article);
                                     i++;
+                                    articleRecycler.userID=userID1;
                                     articleRecycler.notifyDataSetChanged();
 
                                 }
@@ -155,7 +190,7 @@ public class NecessaryFragment extends Fragment {
                 }
                 String tmp = randomStringBuilder.toString();
 
-                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(tmp).set(articleForAdd)
+                firebaseFirestore.collection("Users/" + userID1 + "/Articles").document(tmp).set(articleForAdd)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {

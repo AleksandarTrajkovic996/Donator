@@ -59,6 +59,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
     private TextView addPhotoTextView;
     private TextView numberDonatedProducts;
     private TextView numberReceivedProducts;
+    private TextView numberDonateProducts;
+    private TextView numberNecessaryProducts;
     private TextView phoneNumber;
     private TextView clickToAdd;
     private FirebaseAuth mAuth;
@@ -96,6 +98,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         addPhotoTextView = view.findViewById(R.id.addPhotoTxt);
         numberDonatedProducts = view.findViewById(R.id.numberDonatedProducts);
         numberReceivedProducts = view.findViewById(R.id.numberReceivedProducts);
+        numberDonateProducts = view.findViewById(R.id.numberDonateProducts);
+        numberNecessaryProducts = view.findViewById(R.id.numberNecessaryProducts);
 
         layoutPhoto.setOnClickListener(this);
         layoutProfileInfo.setOnClickListener(this);
@@ -135,6 +139,59 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
             address.setEnabled(true);
             phoneNumber.setEnabled(true);
         }
+
+
+
+        numberDonateProducts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String idTmp = "";
+
+                if(userID == null){
+                    idTmp = mAuth.getUid();
+                }else{
+                    idTmp = userID;
+                }
+
+                Bundle bundle = new Bundle();
+                bundle.putString("userID", idTmp);
+                bundle.putString("type", "donate");
+                DonateFragment donateFragment = new DonateFragment();
+                donateFragment.setArguments(bundle);
+
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.nav_main, donateFragment)
+                        .commit();
+                navigationView.setCheckedItem(R.id.nav_donate);
+            }
+        });
+
+
+        numberNecessaryProducts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String idTmp = "";
+
+                if(userID == null){
+                    idTmp = mAuth.getUid();
+                }else{
+                    idTmp = userID;
+                }
+
+                Bundle bundle = new Bundle();
+                bundle.putString("userID", idTmp);
+                bundle.putString("type", "necessary");
+                NecessaryFragment necessaryFragment = new NecessaryFragment();
+                necessaryFragment.setArguments(bundle);
+
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.nav_main, necessaryFragment)
+                        .commit();
+                navigationView.setCheckedItem(R.id.nav_necessary);
+            }
+        });
 
 
         numberDonatedProducts.setOnClickListener(new View.OnClickListener() {
