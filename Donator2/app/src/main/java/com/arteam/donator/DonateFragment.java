@@ -1,7 +1,6 @@
 package com.arteam.donator;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -50,11 +49,18 @@ public class DonateFragment extends Fragment {
     private Map<Integer, Article> listArticles;
     private ArticleRecycler articleRecycler;
     private RelativeLayout relAddArticle;
+    private RelativeLayout relViewArticle;
     private LinearLayout linearLayout2;
     private LinearLayout linearLayout3;
+    private LinearLayout linearLayout4;
+    private LinearLayout linearLayout5;
     private Button btnOk;
     private Button btnOk2;
     private Button btnCancel;
+    private Button btnAsk;
+    private Button btnOk3;
+    private Button btnCancel2;
+    private TextView txtDescription2;
     private TextView txtName;
     private TextView txtSize;
     private TextView txtDescription;
@@ -67,24 +73,33 @@ public class DonateFragment extends Fragment {
     FloatingActionButton fab;
     private String userID = null;
     private String userType = null;
-    private boolean relLayoutActive;
+    private boolean relAddLayoutActive;
+    private boolean relViewLayoutActive;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_donate, container, false);
 
-        relLayoutActive = false;
+        relAddLayoutActive = false;
+        relViewLayoutActive = false;   //novo!!!
         imageDonate = view.findViewById(R.id.imageViewDonatePhoto);
         relAddArticle = view.findViewById(R.id.relAddArticle);
-        btnOk = view.findViewById(R.id.allow);
-        btnOk2 = view.findViewById(R.id.allow2);
-        btnCancel = view.findViewById(R.id.deny);
+        relViewArticle = view.findViewById(R.id.relViewArticle); //novo!!!
+        btnOk = view.findViewById(R.id.allow);//ok kad se dodaje novi
+        btnOk2 = view.findViewById(R.id.allow2);//ok kad se prikazuje samo - staro!!!
+        btnCancel = view.findViewById(R.id.deny);//cancel kad se dodaje novi
+        btnAsk = view.findViewById(R.id.btnAsk);//ask kad trazimo iz necije liste za doniranje - novo!!!
+        btnOk3 = view.findViewById(R.id.btnOk);//ok kad se prikazuje samo - novo!!!
+        btnCancel2 = view.findViewById(R.id.btnCancel);//cancel kad trazimo iz necije liste za doniranje - novo!!!
+        txtDescription2 = view.findViewById(R.id.txtDesc2);//description kada se otvara za pregled samo - novo!!!
         txtName = view.findViewById(R.id.txtName);
         txtSize = view.findViewById(R.id.txtSize);
         txtDescription = view.findViewById(R.id.txtDesc);
-        linearLayout3 = view.findViewById(R.id.lin3);
-        linearLayout2 = view.findViewById(R.id.lin2);
+        linearLayout3 = view.findViewById(R.id.lin3);//ok kad se prikazuje samo - staro!!!
+        linearLayout2 = view.findViewById(R.id.lin2);//ok i cancel kad se dodaje novi
+        linearLayout4 = view.findViewById(R.id.linAskCancel);//ask i cancel kad pregledavamo kod trugog nekog - novo!!!
+        linearLayout5 = view.findViewById(R.id.linOk);//ok kad se prikazuje samo - novo!!!
         fab = view.findViewById(R.id.fab);
 
         storage = FirebaseStorage.getInstance();
@@ -98,7 +113,8 @@ public class DonateFragment extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore= FirebaseFirestore.getInstance();
 
-        articleRecycler = new ArticleRecycler(imageDonate, listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3, "donate");
+        articleRecycler = new ArticleRecycler(imageDonate, listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3,
+                                                relViewArticle, linearLayout4, linearLayout5, btnAsk, btnOk3, btnCancel2, txtDescription2, "donate");
 
 
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
@@ -109,7 +125,7 @@ public class DonateFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-                if(!relLayoutActive){
+                if(!relAddLayoutActive){
                     txtName.setText("");
                     txtSize.setText("");
                     txtDescription.setText("");
@@ -117,7 +133,7 @@ public class DonateFragment extends Fragment {
                     relAddArticle.setVisibility(View.VISIBLE);
                     linearLayout2.setVisibility(View.VISIBLE);
                     linearLayout3.setVisibility(View.INVISIBLE);
-                    relLayoutActive = true;
+                    relAddLayoutActive = true;
                 }
 
 
@@ -131,7 +147,7 @@ public class DonateFragment extends Fragment {
                 relAddArticle.setVisibility(View.INVISIBLE);
                 linearLayout2.setVisibility(View.INVISIBLE);
                 linearLayout3.setVisibility(View.INVISIBLE);
-                relLayoutActive=false;
+                relAddLayoutActive =false;
             }
         });
 
@@ -172,7 +188,7 @@ public class DonateFragment extends Fragment {
                 relAddArticle.setVisibility(View.INVISIBLE);
                 linearLayout2.setVisibility(View.INVISIBLE);
                 linearLayout3.setVisibility(View.INVISIBLE);
-                relLayoutActive=false;
+                relAddLayoutActive =false;
 
 
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
@@ -215,7 +231,7 @@ public class DonateFragment extends Fragment {
         return view;
     }
 
-    private void fillData(String uID, final String type){ //mAuth.getCurrentUser().getUid()
+    private void fillData(final String uID, final String type){ //mAuth.getCurrentUser().getUid()
         firebaseFirestore.collection("Users/" + uID + "/Articles")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -230,7 +246,9 @@ public class DonateFragment extends Fragment {
                                 if(article.getType().matches(type)){
                                     listArticles.put(i, article);
                                     i++;
+                                    articleRecycler.userID = uID;
                                     articleRecycler.notifyDataSetChanged();
+
                                 }
                             }
                         }

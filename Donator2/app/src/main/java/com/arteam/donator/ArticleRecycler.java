@@ -27,7 +27,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHolder> {
 
@@ -52,11 +54,28 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     private ImageView imageViewDonate;
     public Uri imageUri;
     private String type;
+    public String userID = null;
+
+
+    //u DonateFragment objasnjeno cemu sta sluzi
+    private RelativeLayout relViewArticle;
+    private LinearLayout linearLayout4;
+    private LinearLayout linearLayout5;
+    private Button btnAsk;
+    private Button btnCancel2;
+    private Button btnOk3;
+    private boolean relViewLayoutActive;
+    private TextView txtDescription2;
+
+    private Button btnOffer;
+
     private FirebaseStorage storage;
     private StorageReference storageReference;
 
 
     public ArticleRecycler(ImageView imageDonate, Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3, String type) {
+
+        this.mAuth = FirebaseAuth.getInstance();
         this.imageUri = null;
         this.imageViewDonate = imageDonate;
         this.list = listArticles;
@@ -74,7 +93,11 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         this.type = type;
     }
 
-    public ArticleRecycler(Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3, String type) {
+    //poziva se iz NecessaryFragment
+    public ArticleRecycler(Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3,
+                           RelativeLayout relViewArticle, LinearLayout linearLayout4, LinearLayout linearLayout5, Button btnOffer, Button btnOk3, Button btnCancel2, TextView txtDescription2, String type) {
+
+        this.mAuth = FirebaseAuth.getInstance();
         this.list = listArticles;
         this.relativeLayout = relAddArticle;
         this.txtName = txtName;
@@ -87,10 +110,50 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         this.linearLayout3 = lin3;
         this.linearLayout2 = lin2;
         this.fab = fab;
+
+        this.relViewArticle = relViewArticle;
+        this.linearLayout4 = linearLayout4;
+        this.linearLayout5 = linearLayout5;
+        this.btnOffer = btnOffer;
+        this.btnOk3 = btnOk3;
+        this.btnCancel2 = btnCancel2;
+        this.relViewLayoutActive = false;
+        this.txtDescription2 = txtDescription2;
+
         this.type = type;
     }
 
+    //poziva se iz DonateFragment
+    public ArticleRecycler(ImageView imageDonate, Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3,
+                           RelativeLayout relViewArticle, LinearLayout linearLayout4, LinearLayout linearLayout5, Button btnAsk, Button btnOk3, Button btnCancel2, TextView txtDescription2, String type) {
 
+        this.mAuth = FirebaseAuth.getInstance();
+        this.imageUri = null;
+        this.imageViewDonate = imageDonate;
+        this.list = listArticles;
+        this.relativeLayout = relAddArticle;
+        this.txtName = txtName;
+        this.txtSize = txtSize;
+        this.txtDescription = txtDescription;
+        this.btnOk = btnOk;
+        this.btnOk2 = btnOk2;
+        this.btnCancel = btnCancel;
+        this.relLayoutActive = false;
+        this.linearLayout3 = lin3;
+        this.linearLayout2 = lin2;
+        this.fab = fab;
+
+        this.relViewArticle = relViewArticle;
+        this.linearLayout4 = linearLayout4;
+        this.linearLayout5 = linearLayout5;
+        this.btnAsk = btnAsk;
+        this.btnOk3 = btnOk3;
+        this.btnCancel2 = btnCancel2;
+        this.relViewLayoutActive = false;
+        this.txtDescription2 = txtDescription2;
+
+        this.type = type;
+    }
     @NonNull
     @Override
     public ArticleRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -141,62 +204,296 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!relLayoutActive){
 
-                    firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(articleId).get()
-                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                //1. slucaj - kod prijatelja je u donate listi
+                if(!mAuth.getCurrentUser().getUid().matches(userID) && type.matches("donate")){
+                    if (!relViewLayoutActive) {
 
-                                    if (task.isSuccessful()) {
+                        firebaseFirestore.collection("Users/" + userID + "/Articles").document(articleId).get()
+                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
-                                        if (task.getResult().exists()) {
+                                        if (task.isSuccessful()) {
 
-                                            Article article = task.getResult().toObject(Article.class);
+                                            if (task.getResult().exists()) {
 
-                                            txtName.setText(article.getName());
-                                            txtSize.setText(article.getSize());
-                                            txtDescription.setText(article.getDescription());
+                                                Article article = task.getResult().toObject(Article.class);
 
+                                                //     txtName.setText(article.getName());
+                                                //     txtSize.setText(article.getSize());
+                                                //     txtDescription.setText(article.getDescription());
 
-                                            relativeLayout.setVisibility(View.VISIBLE);
-                                            linearLayout2.setVisibility(View.INVISIBLE);
-                                            linearLayout3.setVisibility(View.VISIBLE);
-                                            relLayoutActive = true;
-                                            txtName.setEnabled(false);
-                                            txtSize.setEnabled(false);
-                                            txtDescription.setEnabled(false);
+                                                txtDescription2.setText(article.getDescription());
+
+                                                relViewArticle.setVisibility(View.VISIBLE);
+                                                linearLayout4.setVisibility(View.VISIBLE);
+                                                linearLayout5.setVisibility(View.INVISIBLE);
+                                                relViewLayoutActive = true;
+                                                //      txtName.setEnabled(false);
+                                                //      txtSize.setEnabled(false);
+                                                txtDescription2.setEnabled(false);
+                                            } else {
+
+                                            }
+
                                         } else {
 
                                         }
 
-                                    } else {
 
                                     }
+                                });
 
 
+                        btnAsk.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                final Map<String, String> articleAsked1 = new HashMap<>();
+                                articleAsked1.put("from", userID);
+                                articleAsked1.put("idArticle", articleId);
+
+                                final Map<String, String> articleAsked2 = new HashMap<>();
+                                articleAsked2.put("for", mAuth.getCurrentUser().getUid());
+                                articleAsked2.put("idArticle", articleId);
+
+                                Random generator = new Random();
+                                StringBuilder randomStringBuilder = new StringBuilder();
+                                int randomLength = generator.nextInt((15 - 10) + 1) + 10;
+                                char tempChar;
+                                for (int i = 0; i < randomLength; i++){
+                                    tempChar = (char) (generator.nextInt(96) + 32);
+                                    randomStringBuilder.append(tempChar);
                                 }
-                            });
+                                String tmp = randomStringBuilder.toString();
 
-                    btnOk2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
+                                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Requests").document(tmp).set(articleAsked1)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
 
-                            if(imageViewDonate != null) {
-                                imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
-                                imageViewDonate.setEnabled(true);
+                                            }
+                                        });
+
+                                firebaseFirestore.collection("Users/" + userID + "/Requests").document(tmp).set(articleAsked2)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+
+                                            }
+                                        });
+
+                                if (imageViewDonate != null) {
+                                    imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                    imageViewDonate.setEnabled(true);
+                                }
+                                //         txtName.setEnabled(true);
+                                //         txtSize.setEnabled(true);
+                                txtDescription2.setEnabled(true);
+                                relViewArticle.setVisibility(View.INVISIBLE);
+                                linearLayout4.setVisibility(View.INVISIBLE);
+                                linearLayout5.setVisibility(View.INVISIBLE);
+                                relViewLayoutActive = false;
                             }
-                            txtName.setEnabled(true);
-                            txtSize.setEnabled(true);
-                            txtDescription.setEnabled(true);
-                            relativeLayout.setVisibility(View.INVISIBLE);
-                            linearLayout2.setVisibility(View.INVISIBLE);
-                            linearLayout3.setVisibility(View.INVISIBLE);
-                            relLayoutActive=false;
-                        }
-                    });
+                        });
+
+                        btnCancel2.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                if (imageViewDonate != null) {
+                                    imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                    imageViewDonate.setEnabled(true);
+                                }
+                                //         txtName.setEnabled(true);
+                                //         txtSize.setEnabled(true);
+                                txtDescription2.setEnabled(true);
+                                relViewArticle.setVisibility(View.INVISIBLE);
+                                linearLayout4.setVisibility(View.INVISIBLE);
+                                linearLayout5.setVisibility(View.INVISIBLE);
+                                relViewLayoutActive = false;
+                            }
+                        });
+
+                    }
+                }
+                //2. slucaj - kod prijatelja je u necessary listi
+                else if(!mAuth.getCurrentUser().getUid().matches(userID) && type.matches("necessary")){
+                    if (!relViewLayoutActive) {
+
+                        firebaseFirestore.collection("Users/" + userID + "/Articles").document(articleId).get()
+                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                                        if (task.isSuccessful()) {
+
+                                            if (task.getResult().exists()) {
+
+                                                Article article = task.getResult().toObject(Article.class);
+
+                                                //     txtName.setText(article.getName());
+                                                //     txtSize.setText(article.getSize());
+                                                //     txtDescription.setText(article.getDescription());
+
+                                                txtDescription2.setText(article.getDescription());
+
+                                                relViewArticle.setVisibility(View.VISIBLE);
+                                                linearLayout4.setVisibility(View.VISIBLE);
+                                                linearLayout5.setVisibility(View.INVISIBLE);
+                                                relViewLayoutActive = true;
+                                                //      txtName.setEnabled(false);
+                                                //      txtSize.setEnabled(false);
+                                                txtDescription2.setEnabled(false);
+                                            } else {
+
+                                            }
+
+                                        } else {
+
+                                        }
+
+
+                                    }
+                                });
+
+
+                        btnOffer.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                final Map<String, String> articleAsked1 = new HashMap<>();
+                                articleAsked1.put("for", userID);
+                                articleAsked1.put("idArticle", articleId);
+
+                                final Map<String, String> articleAsked2 = new HashMap<>();
+                                articleAsked2.put("from", mAuth.getCurrentUser().getUid());
+                                articleAsked2.put("idArticle", articleId);
+
+                                Random generator = new Random();
+                                StringBuilder randomStringBuilder = new StringBuilder();
+                                int randomLength = generator.nextInt((15 - 10) + 1) + 10;
+                                char tempChar;
+                                for (int i = 0; i < randomLength; i++){
+                                    tempChar = (char) (generator.nextInt(96) + 32);
+                                    randomStringBuilder.append(tempChar);
+                                }
+                                String tmp = randomStringBuilder.toString();
+
+                                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Requests").document(tmp).set(articleAsked1)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+
+                                            }
+                                        });
+
+                                firebaseFirestore.collection("Users/" + userID + "/Requests").document(tmp).set(articleAsked2)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+
+                                            }
+                                        });
+
+
+                                if (imageViewDonate != null) {
+                                    imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                    imageViewDonate.setEnabled(true);
+                                }
+                                //         txtName.setEnabled(true);
+                                //         txtSize.setEnabled(true);
+                                txtDescription2.setEnabled(true);
+                                relViewArticle.setVisibility(View.INVISIBLE);
+                                linearLayout4.setVisibility(View.INVISIBLE);
+                                linearLayout5.setVisibility(View.INVISIBLE);
+                                relViewLayoutActive = false;
+                            }
+                        });
+
+                        btnCancel2.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                if (imageViewDonate != null) {
+                                    imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                    imageViewDonate.setEnabled(true);
+                                }
+                                //         txtName.setEnabled(true);
+                                //         txtSize.setEnabled(true);
+                                txtDescription2.setEnabled(true);
+                                relViewArticle.setVisibility(View.INVISIBLE);
+                                linearLayout4.setVisibility(View.INVISIBLE);
+                                linearLayout5.setVisibility(View.INVISIBLE);
+                                relViewLayoutActive = false;
+                            }
+                        });
+
+                    }
+                }
+                //3. slucaj - sve ostalo (kod prijatelja u donated i recived listama ili kod sebe u svim listama)
+                else {
+                    if (!relViewLayoutActive) {
+
+                        firebaseFirestore.collection("Users/" + userID + "/Articles").document(articleId).get()
+                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                                        if (task.isSuccessful()) {
+
+                                            if (task.getResult().exists()) {
+
+                                                Article article = task.getResult().toObject(Article.class);
+
+                                                //     txtName.setText(article.getName());
+                                                //     txtSize.setText(article.getSize());
+                                                //     txtDescription.setText(article.getDescription());
+
+                                                txtDescription2.setText(article.getDescription());
+
+                                                relViewArticle.setVisibility(View.VISIBLE);
+                                                linearLayout4.setVisibility(View.INVISIBLE);
+                                                linearLayout5.setVisibility(View.VISIBLE);
+                                                relViewLayoutActive = true;
+                                                //      txtName.setEnabled(false);
+                                                //      txtSize.setEnabled(false);
+                                                txtDescription2.setEnabled(false);
+                                            } else {
+
+                                            }
+
+                                        } else {
+
+                                        }
+
+
+                                    }
+                                });
+
+                        btnOk3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                if (imageViewDonate != null) {
+                                    imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
+                                    imageViewDonate.setEnabled(true);
+                                }
+                                //         txtName.setEnabled(true);
+                                //         txtSize.setEnabled(true);
+                                txtDescription2.setEnabled(true);
+                                relViewArticle.setVisibility(View.INVISIBLE);
+                                linearLayout4.setVisibility(View.INVISIBLE);
+                                linearLayout5.setVisibility(View.INVISIBLE);
+                                relViewLayoutActive = false;
+                            }
+                        });
+
+                    }
 
                 }
+
             }
         });
 
