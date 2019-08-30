@@ -234,6 +234,8 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                                 //      txtName.setEnabled(false);
                                                 //      txtSize.setEnabled(false);
                                                 txtDescription2.setEnabled(false);
+
+
                                             } else {
 
                                             }
@@ -251,13 +253,14 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                             @Override
                             public void onClick(View v) {
 
-                                final Map<String, String> articleAsked1 = new HashMap<>();
-                                articleAsked1.put("from", userID);
-                                articleAsked1.put("idArticle", articleId);
+//                                final Map<String, String> articleAsked1 = new HashMap<>();
+//                                articleAsked1.put("from", userID);
+//                                articleAsked1.put("idArticle", articleId);
 
                                 final Map<String, String> articleAsked2 = new HashMap<>();
-                                articleAsked2.put("for", mAuth.getCurrentUser().getUid());
-                                articleAsked2.put("idArticle", articleId);
+                                articleAsked2.put("forID", mAuth.getCurrentUser().getUid());
+                                articleAsked2.put("articleID", articleId);
+                                articleAsked2.put("fromID", "");
 
                                 Random generator = new Random();
                                 StringBuilder randomStringBuilder = new StringBuilder();
@@ -269,7 +272,15 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                 }
                                 String tmp = randomStringBuilder.toString();
 
-                                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Requests").document(tmp).set(articleAsked1)
+//                                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Requests").document(tmp).set(articleAsked1)
+//                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                            @Override
+//                                            public void onSuccess(Void aVoid) {
+//
+//                                            }
+//                                        });
+
+                                firebaseFirestore.collection("Users/" + userID + "/Requests").document(tmp).set(articleAsked2)
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
@@ -277,7 +288,10 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                             }
                                         });
 
-                                firebaseFirestore.collection("Users/" + userID + "/Requests").document(tmp).set(articleAsked2)
+                                final Map<String, String> notificationAsked = new HashMap<>();
+                                notificationAsked.put("text", "Traze od Vas neki artikl");
+
+                                firebaseFirestore.collection("Users/" + userID + "/Notifications").document(tmp).set(notificationAsked) //id ce da budi isti kao i kod request-a
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void aVoid) {
@@ -296,6 +310,8 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                 linearLayout4.setVisibility(View.INVISIBLE);
                                 linearLayout5.setVisibility(View.INVISIBLE);
                                 relViewLayoutActive = false;
+
+
                             }
                         });
 
@@ -314,6 +330,8 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                 linearLayout4.setVisibility(View.INVISIBLE);
                                 linearLayout5.setVisibility(View.INVISIBLE);
                                 relViewLayoutActive = false;
+
+
                             }
                         });
 
@@ -364,13 +382,14 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                             @Override
                             public void onClick(View v) {
 
-                                final Map<String, String> articleAsked1 = new HashMap<>();
-                                articleAsked1.put("for", userID);
-                                articleAsked1.put("idArticle", articleId);
+//                                final Map<String, String> articleAsked1 = new HashMap<>();
+//                                articleAsked1.put("for", userID);
+//                                articleAsked1.put("idArticle", articleId);
 
                                 final Map<String, String> articleAsked2 = new HashMap<>();
-                                articleAsked2.put("from", mAuth.getCurrentUser().getUid());
-                                articleAsked2.put("idArticle", articleId);
+                                articleAsked2.put("fromID", mAuth.getCurrentUser().getUid());
+                                articleAsked2.put("articleID", articleId);
+                                articleAsked2.put("forID", "");
 
                                 Random generator = new Random();
                                 StringBuilder randomStringBuilder = new StringBuilder();
@@ -382,13 +401,13 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                 }
                                 String tmp = randomStringBuilder.toString();
 
-                                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Requests").document(tmp).set(articleAsked1)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-
-                                            }
-                                        });
+//                                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Requests").document(tmp).set(articleAsked1)
+//                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                            @Override
+//                                            public void onSuccess(Void aVoid) {
+//
+//                                            }
+//                                        });
 
                                 firebaseFirestore.collection("Users/" + userID + "/Requests").document(tmp).set(articleAsked2)
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -398,6 +417,16 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                             }
                                         });
 
+                                final Map<String, String> notificationOffer = new HashMap<>();
+                                notificationOffer.put("text", "Nude Vam neki artikl");
+
+                                firebaseFirestore.collection("Users/" + userID + "/Notifications").document(tmp).set(notificationOffer) //id ce da budi isti kao i kod request-a
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+
+                                            }
+                                        });
 
                                 if (imageViewDonate != null) {
                                     imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
@@ -461,6 +490,11 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                                 //      txtName.setEnabled(false);
                                                 //      txtSize.setEnabled(false);
                                                 txtDescription2.setEnabled(false);
+
+
+
+                                                //novo:
+                                                fab.setEnabled(false);
                                             } else {
 
                                             }
@@ -488,6 +522,10 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                 linearLayout4.setVisibility(View.INVISIBLE);
                                 linearLayout5.setVisibility(View.INVISIBLE);
                                 relViewLayoutActive = false;
+
+
+                                //novo:
+                                fab.setEnabled(true);
                             }
                         });
 
