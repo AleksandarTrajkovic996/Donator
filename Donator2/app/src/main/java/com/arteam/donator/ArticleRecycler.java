@@ -75,8 +75,8 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     private RelativeLayout relViewArticle;
     private LinearLayout linearLayout4;
     private LinearLayout linearLayout5;
-    private Button btnAsk;
     private Button btnCancel2;
+    private Button btnAsk;
     private Button btnOk3;
     private boolean relViewLayoutActive;
     private TextView txtDescription2;
