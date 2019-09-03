@@ -1,16 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_profile"
+        android:id="@+id/action_map_Donate"
         android:orderInCategory="100"
-        android:icon="@drawable/profile"
-        android:title="@string/profile"
-        app:showAsAction="ifRoom" />
+        android:title="@string/donate"
+        android:icon="@drawable/doniraj"
+        app:showAsAction="always" />
     <item
-        android:id="@+id/action_logout"
+        android:id="@+id/action_map_Necessary"
         android:orderInCategory="100"
-        android:icon="@drawable/logout"
-        android:title="@string/logout"
-        app:showAsAction="ifRoom" />
+        android:title="@string/necessary"
+        android:icon="@drawable/necessary"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_map_Friends"
+        android:orderInCategory="100"
+        android:title="@string/friends"
+        android:icon="@drawable/friends"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_map_radius_30_km"
+        android:orderInCategory="100"
+        android:title="Radius 30km"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_map_radius_50_km"
+        android:orderInCategory="100"
+        android:title="Radius 50km"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_map_radius_100_km"
+        android:orderInCategory="100"
+        android:title="Radius 100km"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_map_radius_500_km"
+        android:orderInCategory="100"
+        android:title="Radius 500km"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_map_exit_radius"
+        android:orderInCategory="100"
+        android:title="Exit search"
+        app:showAsAction="never" />
 </menu>

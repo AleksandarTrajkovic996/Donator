@@ -43,6 +43,7 @@ public class NavigationMainActivity extends AppCompatActivity
     private FirebaseStorage storage;
     private StorageReference storageReference;
     private byte[] bytesImg = null;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class NavigationMainActivity extends AppCompatActivity
         setContentView(R.layout.activity_navigation_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
@@ -96,8 +98,9 @@ public class NavigationMainActivity extends AppCompatActivity
 
                                 String firstNameTmp = task.getResult().getString("first_name");
                                 String lastNameTmp = task.getResult().getString("last_name");
-
-                                 fullNameNavigationMain.setText(firstNameTmp + " " + lastNameTmp);
+                                final User u = task.getResult().toObject(User.class);
+                                user = u;
+                                fullNameNavigationMain.setText(firstNameTmp + " " + lastNameTmp);
                             }else{
 
                                 Toast.makeText(NavigationMainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
@@ -123,47 +126,11 @@ public class NavigationMainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.navigation_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        if (id == R.id.action_logout) {
-            mAuth.signOut();
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-            finish();
-        }else if(id == R.id.action_profile) {
-            if(bytesImg!=null) {
-                Bundle bundle = new Bundle();
-                bundle.putByteArray("profileImg", this.bytesImg);
-                ProfileFragment profileFragment = new ProfileFragment();
-                profileFragment.setArguments(bundle);
-
-                fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, profileFragment)
-                        .commit();
-            }else{
-                fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, new ProfileFragment())
-                        .commit();
-            }
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -185,8 +152,11 @@ public class NavigationMainActivity extends AppCompatActivity
                     .replace(R.id.nav_main, new NecessaryFragment())
                     .commit();
         } else if (id == R.id.nav_map) {
+            MapsFragment mapsFragment = new MapsFragment();
+            mapsFragment.setUser(user);
+
             fragmentManager.beginTransaction()
-                    .replace(R.id.nav_main, new MapsFragment())
+                    .replace(R.id.nav_main, mapsFragment)
                     .commit();
         } else if (id == R.id.nav_request) {
             fragmentManager.beginTransaction()
