@@ -1,6 +1,7 @@
 package com.arteam.donator;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -76,6 +77,7 @@ public class DonateFragment extends Fragment {
     private boolean relAddLayoutActive;
     private boolean relViewLayoutActive;
 
+    @SuppressLint("RestrictedApi")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -121,6 +123,7 @@ public class DonateFragment extends Fragment {
         recyclerView.setAdapter(articleRecycler);
 
 
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -133,6 +136,7 @@ public class DonateFragment extends Fragment {
                     relAddArticle.setVisibility(View.VISIBLE);
                     linearLayout2.setVisibility(View.VISIBLE);
                     linearLayout3.setVisibility(View.INVISIBLE);
+                    recyclerView.setEnabled(false);
                     relAddLayoutActive = true;
                 }
 
@@ -147,6 +151,7 @@ public class DonateFragment extends Fragment {
                 relAddArticle.setVisibility(View.INVISIBLE);
                 linearLayout2.setVisibility(View.INVISIBLE);
                 linearLayout3.setVisibility(View.INVISIBLE);
+                recyclerView.setEnabled(true);
                 relAddLayoutActive =false;
             }
         });
@@ -160,15 +165,8 @@ public class DonateFragment extends Fragment {
                 articleForAdd.put("description", txtDescription.getText().toString());
                 articleForAdd.put("type", "donate");
 
-                Random generator = new Random();
-                StringBuilder randomStringBuilder = new StringBuilder();
-                int randomLength = generator.nextInt((15 - 10) + 1) + 10;
-                char tempChar;
-                for (int i = 0; i < randomLength; i++){
-                    tempChar = (char) (generator.nextInt(96) + 32);
-                    randomStringBuilder.append(tempChar);
-                }
-                String tmp = randomStringBuilder.toString();
+
+                String tmp = getNewID();
 
                 firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(tmp).set(articleForAdd)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -188,6 +186,7 @@ public class DonateFragment extends Fragment {
                 relAddArticle.setVisibility(View.INVISIBLE);
                 linearLayout2.setVisibility(View.INVISIBLE);
                 linearLayout3.setVisibility(View.INVISIBLE);
+                recyclerView.setEnabled(true);
                 relAddLayoutActive =false;
 
 
@@ -205,6 +204,10 @@ public class DonateFragment extends Fragment {
             this.fillData(userID, userType);
         }
 
+        if(userID != null)
+            if(!mAuth.getCurrentUser().getUid().matches(userID) || userType.matches("donated") || userType.matches("received")) {
+                fab.setVisibility(View.INVISIBLE);
+          }
 
         if(imageUri==null && bundle == null) {
             imageDonate.setOnClickListener(new View.OnClickListener() {
@@ -264,6 +267,18 @@ public class DonateFragment extends Fragment {
         intent.putExtra(Intent.EXTRA_MIME_TYPES,mimeTypes);
         startActivityForResult(intent,1000);
 
+    }
+
+    public String getNewID(){
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = generator.nextInt((15 - 10) + 1) + 10;
+        char tempChar;
+        for (int i = 0; i < randomLength; i++){
+            tempChar = (char) (generator.nextInt(96) + 32);
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString();
     }
 
     @Override

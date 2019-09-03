@@ -20,35 +20,35 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FriendsFragment extends Fragment {
+public class NotificationFragment extends Fragment {
 
     View view;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
     private RecyclerView recyclerView;
-    private Map<Integer, User> listFriends;
-    private UserRecycler friendsRecycler;
+    private Map<Integer, Notification> listNotifications;
+    private NotificationRecycler notificationRecycler;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_friends, container, false);
+        view = inflater.inflate(R.layout.fragment_notification, container, false);
 
-        recyclerView = view.findViewById(R.id.listFriendsRecycler);
+        recyclerView = view.findViewById(R.id.listNotificationRecycler);
 
 
-        listFriends = new HashMap<>();
+        listNotifications = new HashMap<>();
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore= FirebaseFirestore.getInstance();
 
-        friendsRecycler = new UserRecycler(listFriends);
+        notificationRecycler = new NotificationRecycler(listNotifications);
 
 
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
-        recyclerView.setAdapter(friendsRecycler);
+        recyclerView.setAdapter(notificationRecycler);
 
 
-        firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Friends")
+        firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Notifications")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
@@ -58,15 +58,14 @@ public class FriendsFragment extends Fragment {
 
 
 
-                                String friendID = doc.getDocument().getId();
-                                User friend = doc.getDocument().toObject(User.class).withId(friendID, i);
-
-                                //to do: ovde pribaviti sve podatke o prijateljima
-
-                                listFriends.put(i, friend);
+                                String notificationID = doc.getDocument().getId();
+                                Notification notification = doc.getDocument().toObject(Notification.class).withId(notificationID, i);
+                                //     if(friend.getType().matches("donate")){
+                                listNotifications.put(i, notification);
                                 i++;
-                                friendsRecycler.notifyDataSetChanged();
+                                notificationRecycler.notifyDataSetChanged();
 
+                                //  }
                             }
                         }
                     }

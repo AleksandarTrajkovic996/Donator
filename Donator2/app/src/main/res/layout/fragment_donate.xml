@@ -194,7 +194,7 @@
                 android:layout_width="0.0dip"
                 android:layout_height="fill_parent"
                 android:layout_weight="1.0"
-                android:text="str-ask" />
+                android:text="Ask" />
 
             <Button
                 android:id="@+id/btnCancel"

@@ -192,6 +192,10 @@ public class NavigationMainActivity extends AppCompatActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.nav_main, new RequestFragment())
                     .commit();
+        } else if (id == R.id.nav_notification) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.nav_main, new NotificationFragment())
+                    .commit();
         } else if (id == R.id.nav_profile) {
 
             if(bytesImg!=null) {

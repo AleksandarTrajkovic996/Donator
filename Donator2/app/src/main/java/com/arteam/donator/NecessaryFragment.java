@@ -1,5 +1,6 @@
 package com.arteam.donator;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -62,6 +63,7 @@ public class NecessaryFragment extends Fragment {
     private RelativeLayout relViewArticle;
 
 
+    @SuppressLint("RestrictedApi")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -137,6 +139,7 @@ public class NecessaryFragment extends Fragment {
         String userID=null;
         final String userID1;
         String userType;
+
         Bundle bundle = getArguments();
         if(bundle!=null){
             userID = bundle.getString("userID");
@@ -145,6 +148,10 @@ public class NecessaryFragment extends Fragment {
         }else {
             userID = mAuth.getUid();
             userID1 = userID;
+        }
+
+        if(!mAuth.getCurrentUser().getUid().matches(userID)) {
+            fab.setVisibility(View.INVISIBLE);
         }
 
         firebaseFirestore.collection("Users/" + userID + "/Articles")
@@ -180,15 +187,8 @@ public class NecessaryFragment extends Fragment {
                 articleForAdd.put("description", txtDescription.getText().toString());
                 articleForAdd.put("type", "necessary");
 
-                Random generator = new Random();
-                StringBuilder randomStringBuilder = new StringBuilder();
-                int randomLength = generator.nextInt((15 - 10) + 1) + 10;
-                char tempChar;
-                for (int i = 0; i < randomLength; i++){
-                    tempChar = (char) (generator.nextInt(96) + 32);
-                    randomStringBuilder.append(tempChar);
-                }
-                String tmp = randomStringBuilder.toString();
+
+                String tmp = getNewID();
 
                 firebaseFirestore.collection("Users/" + userID1 + "/Articles").document(tmp).set(articleForAdd)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -214,6 +214,16 @@ public class NecessaryFragment extends Fragment {
         return view;
     }
 
-
+    public String getNewID(){
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = generator.nextInt((15 - 10) + 1) + 10;
+        char tempChar;
+        for (int i = 0; i < randomLength; i++){
+            tempChar = (char) (generator.nextInt(96) + 32);
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString();
+    }
 
 }

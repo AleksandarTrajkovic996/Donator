@@ -4,6 +4,7 @@ package com.arteam.donator;
 
 public class User extends UserID {
 
+    private String friendID;
     private String first_name;
     private String last_name;
     private String address;
@@ -12,12 +13,21 @@ public class User extends UserID {
 
     public User(){ }
 
-    public User(String first_name, String last_name, String address, String country, String phone_number) {
+    public User(String first_name, String last_name, String address, String country, String phone_number, String fID) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.address = address;
         this.country = country;
         this.phone_number = phone_number;
+        this.friendID = fID;
+    }
+
+    public String getFriendID() {
+        return friendID;
+    }
+
+    public void setFriendID(String friendID) {
+        this.friendID = friendID;
     }
 
     public String getFirst_name() {
