@@ -76,6 +76,8 @@ public class DonateFragment extends Fragment {
     private String userType = null;
     private boolean relAddLayoutActive;
     private boolean relViewLayoutActive;
+    private Map<String, String> listOfValue;
+
 
     @SuppressLint("RestrictedApi")
     @Nullable
@@ -114,6 +116,10 @@ public class DonateFragment extends Fragment {
         listArticles = new HashMap<>();
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore= FirebaseFirestore.getInstance();
+
+
+        listOfValue = new HashMap<>();
+        listOfValue.put("patike", "5");
 
         articleRecycler = new ArticleRecycler(imageDonate, listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3,
                                                 relViewArticle, linearLayout4, linearLayout5, btnAsk, btnOk3, btnCancel2, txtDescription2, "donate");

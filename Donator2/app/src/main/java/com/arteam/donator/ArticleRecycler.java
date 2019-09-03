@@ -86,8 +86,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     private FirebaseStorage storage;
     private StorageReference storageReference;
 
-
-
     public ArticleRecycler(ImageView imageDonate, Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3, String type) {
 
         this.mAuth = FirebaseAuth.getInstance();
@@ -178,7 +176,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         if(type.matches("donate")) {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data_article, viewGroup, false);
             context = viewGroup.getContext();
-        }else if(type.matches("necessary")){
+        } else if(type.matches("necessary")){
              view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data_necessary, viewGroup, false);
             context = viewGroup.getContext();
         }
@@ -189,6 +187,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         firebaseFirestore = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
+
 
         return new ViewHolder(view);
     }
@@ -201,6 +200,8 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         final String name = list.get(position).getName();
         final String size = list.get(position).getSize();
         final String description = list.get(position).getDescription();
+
+
 
         holder.setTxtDisplay(name, size);
 
@@ -242,7 +243,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                                 if (task.getResult().exists()) {
 
                                                     Article article = task.getResult().toObject(Article.class);
-
+                                                    listPomOne.put(0, article);
                                                     //     txtName.setText(article.getName());
                                                     //     txtSize.setText(article.getSize());
                                                     //     txtDescription.setText(article.getDescription());
@@ -292,8 +293,9 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                                 }
                                             });
 
+
                                     final Map<String, String> notificationAsked = new HashMap<>();
-                                    notificationAsked.put("text", "Traze od Vas neki artikl");
+                                    notificationAsked.put("text", "Od Vas se trazi: " + listPomOne.get(0).getName() + ", " + listPomOne.get(0).getSize());
 
                                     firebaseFirestore.collection("Users/" + userID + "/Notifications").document(tmp).set(notificationAsked) //id ce da budi isti kao i kod request-a
                                             .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -573,7 +575,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                         });
 
                 final Map<String, String> notificationOffer = new HashMap<>();
-                notificationOffer.put("text", "Nude Vam neki artikl");
+                notificationOffer.put("text", "Imate novu ponudu");
 
                 firebaseFirestore.collection("Users/" + userID + "/Notifications").document(tmp).set(notificationOffer) //id ce da budi isti kao i kod request-a
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
