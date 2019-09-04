@@ -2,7 +2,7 @@ package com.arteam.donator;
 
 public class Article extends ArticleID {
 
-    public String type, name, size, description, value;
+    public String type, name, size, description;
     //type: donate, necessary, donated, received
 
     public Article(){
@@ -45,13 +45,5 @@ public class Article extends ArticleID {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 }
