@@ -232,6 +232,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:inputType="numberDecimal"
                         android:text="0"
                         android:textSize="24sp" />
@@ -241,6 +242,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:text="DONATE"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -259,6 +261,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:inputType="numberDecimal"
                         android:text="0"
                         android:textSize="24sp" />
@@ -268,6 +271,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:text="NECESSARY"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -285,6 +289,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:inputType="numberDecimal"
                         android:text="0"
                         android:textSize="24sp" />
@@ -292,6 +297,7 @@
                     <TextView
                         android:id="@+id/numberDonatedProducts333"
                         android:layout_width="wrap_content"
+                        android:enabled="false"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="DONATED"
@@ -311,6 +317,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:inputType="numberDecimal"
                         android:text="0"
                         android:textSize="24sp" />
@@ -320,6 +327,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:text="RECEIVED"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -336,6 +344,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:inputType="numberDecimal"
                         android:text="0"
                         android:textSize="24sp" />
@@ -345,6 +354,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:enabled="false"
                         android:text="POINTS"
                         android:textSize="14sp" />
                 </LinearLayout>

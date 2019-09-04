@@ -75,8 +75,8 @@ public class DonateFragment extends Fragment {
     private String userID = null;
     private String userType = null;
     private boolean relAddLayoutActive;
-    private boolean relViewLayoutActive;
     private Map<String, String> listOfValue;
+
 
 
     @SuppressLint("RestrictedApi")
