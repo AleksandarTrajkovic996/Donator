@@ -27,6 +27,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,10 +60,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
     private EditText lastName;
     private EditText address;
     private TextView addPhotoTextView;
-    private TextView numberDonatedProducts;
-    private TextView numberReceivedProducts;
-    private TextView numberDonateProducts;
-    private TextView numberNecessaryProducts;
+
+    private EditText numberDonateProducts;
+    private EditText numberNecessaryProducts;
+    private EditText numberDonatedProducts;
+    private EditText numberReceivedProducts;
+    private EditText numberPoints;
+
     private TextView phoneNumber;
     private TextView clickToAdd;
     private FirebaseAuth mAuth;
@@ -75,6 +79,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
     private Uri imageUri = null;
     private byte[] bytesProfile = null;
     private String userID = null;
+
+    private LinearLayout linDonate;
+    private LinearLayout linNecessary;
+    private LinearLayout linDonated;
+    private LinearLayout linReceived;
 
     @Nullable
     @Override
@@ -99,10 +108,18 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         btnEdit = view.findViewById(R.id.btnEditProfile);
         profilePhoto = view.findViewById(R.id.profilePhotoAddImageView);
         addPhotoTextView = view.findViewById(R.id.addPhotoTxt);
-        numberDonatedProducts = view.findViewById(R.id.numberDonatedProducts);
-        numberReceivedProducts = view.findViewById(R.id.numberReceivedProducts);
+
+
         numberDonateProducts = view.findViewById(R.id.numberDonateProducts);
         numberNecessaryProducts = view.findViewById(R.id.numberNecessaryProducts);
+        numberDonatedProducts = view.findViewById(R.id.numberDonatedProducts);
+        numberReceivedProducts = view.findViewById(R.id.numberReceivedProducts);
+        numberPoints = view.findViewById(R.id.points);
+
+        linDonate = view.findViewById(R.id.linDonate);
+        linNecessary = view.findViewById(R.id.linNecessary);
+        linDonated = view.findViewById(R.id.linDonated);
+        linReceived = view.findViewById(R.id.linReceived);
 
         layoutPhoto.setOnClickListener(this);
         layoutProfileInfo.setOnClickListener(this);
@@ -145,7 +162,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
 
 
-        numberDonateProducts.setOnClickListener(new View.OnClickListener() {
+        linDonate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String idTmp = "";
@@ -171,7 +188,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         });
 
 
-        numberNecessaryProducts.setOnClickListener(new View.OnClickListener() {
+        linNecessary.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String idTmp = "";
@@ -197,7 +214,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         });
 
 
-        numberDonatedProducts.setOnClickListener(new View.OnClickListener() {
+        linDonated.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String idTmp = "";
@@ -222,7 +239,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
             }
         });
 
-        numberReceivedProducts.setOnClickListener(new View.OnClickListener() {
+        linReceived.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String idTmp = "";
@@ -353,11 +370,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
                             lastName.setText(user.getLast_name());
                             address.setText(user.getAddress());
                             phoneNumber.setText(user.getPhone_number());
+                            numberPoints.setText(user.getPoints());
 
                         }else{
-
                             Toast.makeText(getActivity(), R.string.error, Toast.LENGTH_SHORT).show();
-
                         }
                     }
                 }
@@ -367,9 +383,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-
                             int i = queryDocumentSnapshots.size();
-                            numberDonatedProducts.setText("Donated:" + i);
+                            numberDonatedProducts.setText(String.valueOf(i));
                         }
                     });
 
@@ -377,11 +392,28 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-
                         int i = queryDocumentSnapshots.size();
-                        numberReceivedProducts.setText("Received:" + i);
+                        numberReceivedProducts.setText(String.valueOf(i));
                     }
                 });
+
+            firebaseFirestore.collection("Users/" + user_id + "/Articles").whereEqualTo("type", "donate")
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                            int i = queryDocumentSnapshots.size();
+                            numberDonateProducts.setText(String.valueOf(i));
+                        }
+                    });
+
+            firebaseFirestore.collection("Users/" + user_id + "/Articles").whereEqualTo("type", "necessary")
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                            int i = queryDocumentSnapshots.size();
+                            numberNecessaryProducts.setText(String.valueOf(i));
+                        }
+                    });
     }
 
     public boolean validation(){

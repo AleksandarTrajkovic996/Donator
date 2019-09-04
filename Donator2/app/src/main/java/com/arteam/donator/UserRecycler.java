@@ -58,9 +58,10 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
 
         final String first_name = list.get(i).getFirst_name();
         final String last_name = list.get(i).getLast_name();
+        final String points = list.get(i).getPoints();
 
 
-        holder.setTxtDisplay(first_name, last_name);
+        holder.setTxtDisplay(first_name, last_name + ", " + points);
 
         holder.one_data_user.setOnClickListener(new View.OnClickListener() {
             @Override

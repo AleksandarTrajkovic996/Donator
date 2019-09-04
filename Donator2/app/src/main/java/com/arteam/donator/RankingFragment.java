@@ -1,5 +1,6 @@
 package com.arteam.donator;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -33,6 +36,8 @@ public class RankingFragment extends Fragment {
     private Map<Integer, User> listFriends;
     private Map<Integer, User> listFriends2;
     private UserRecycler friendsRecycler;
+    private ToggleButton btnFriends;
+    private ToggleButton btnAllUsers;
 
     @Nullable
     @Override
@@ -40,87 +45,114 @@ public class RankingFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_ranking, container, false);
 
         recyclerView = view.findViewById(R.id.listFriendsRecycler);
-
+        btnFriends = view.findViewById(R.id.btnSortFriends);
+        btnAllUsers = view.findViewById(R.id.btnSortAllUsers);
 
         listFriends = new HashMap<>();
         listFriends2 = new HashMap<>();
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore= FirebaseFirestore.getInstance();
-
         friendsRecycler = new UserRecycler(listFriends2);
-
 
         recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
         recyclerView.setAdapter(friendsRecycler);
 
-        if (false) {
-            sortirajPrijatelje(new FriendsListCallback() {
-                @Override
-                public void onCallback() {
-
-                }
-
-                @Override
-                public void onCallback(Map<Integer, User> l) {
-                    int n = l.size();
-                    for (int i = 1; i < n; ++i) {
-                        User key = l.get(i);
-                        int j = i - 1;
 
 
-                        while (j >= 0 && l.get(j).compareTo(key) < 0) {
-                            l.put(j + 1, l.get(j));
-                            j = j - 1;
-                        }
-                        l.put(j + 1, key);
-                    }
+        btnFriends.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                    //for (int i = 0; i < l.size(); i++)
+                if(isChecked){
+                    btnFriends.setBackgroundColor(Color.BLUE);
+                    btnAllUsers.setChecked(false);
+                    listFriends.clear();
+                    listFriends2.clear();
                     friendsRecycler.notifyDataSetChanged();
-                }
-            });
-        }
-        else {
-            sortirajSve(new FriendsListCallback() {
-                @Override
-                public void onCallback() {
 
-                }
+                    sortirajPrijatelje(new FriendsListCallback() {
+                        @Override
+                        public void onCallback() {
 
-                @Override
-                public void onCallback(Map<Integer, User> l) {
-                    int n = l.size();
-                    for (int i = 1; i < n; ++i) {
-                        User key = l.get(i);
-                        int j = i - 1;
-
-
-                        while (j >= 0 && l.get(j).compareTo(key) < 0) {
-                            l.put(j + 1, l.get(j));
-                            j = j - 1;
                         }
-                        l.put(j + 1, key);
-                    }
 
-                    //for (int i = 0; i < l.size(); i++)
-                    friendsRecycler.notifyDataSetChanged();
+                        @Override
+                        public void onCallback(Map<Integer, User> l) {
+                            int n = l.size();
+                            for (int i = 1; i < n; ++i) {
+                                User key = l.get(i);
+                                int j = i - 1;
+
+
+                                while (j >= 0 && l.get(j).compareTo(key) < 0) {
+                                    l.put(j + 1, l.get(j));
+                                    j = j - 1;
+                                }
+                                l.put(j + 1, key);
+                            }
+
+                            friendsRecycler.notifyDataSetChanged();
+
+                        }
+                    });
+                }else{
+                    btnFriends.setBackgroundColor(Color.LTGRAY);
                 }
-            });
-        }
 
+            }
+        });
+
+        btnAllUsers.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    btnAllUsers.setBackgroundColor(Color.BLUE);
+                    btnFriends.setChecked(false);
+                    listFriends2.clear();
+                    listFriends.clear();
+                    friendsRecycler.notifyDataSetChanged();
+
+                    sortirajSve(new FriendsListCallback() {
+                        @Override
+                        public void onCallback() {
+
+                        }
+
+                        @Override
+                        public void onCallback(Map<Integer, User> l) {
+                            int n = l.size();
+                            for (int i = 1; i < n; ++i) {
+                                User key = l.get(i);
+                                int j = i - 1;
+
+
+                                while (j >= 0 && l.get(j).compareTo(key) < 0) {
+                                    l.put(j + 1, l.get(j));
+                                    j = j - 1;
+                                }
+                                l.put(j + 1, key);
+                            }
+
+                            friendsRecycler.notifyDataSetChanged();
+
+                        }
+                    });
+                }else{
+                        btnAllUsers.setBackgroundColor(Color.LTGRAY);
+                }
+            }
+        });
+
+        btnAllUsers.setChecked(true);
 
         return view;
     }
-
-
-
 
     public void sortirajPrijatelje(final FriendsListCallback friendsListCallback){
 
         pribaviPrijatelje(new FriendsListCallback() {
             @Override
             public void onCallback() {
-
 
                 firebaseFirestore.collection("Users")
                         .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -129,29 +161,20 @@ public class RankingFragment extends Fragment {
                                 int i = 0;
                                 for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
                                     if (doc.getType() == DocumentChange.Type.ADDED) {
-
-
-
                                         String friendID = doc.getDocument().getId();
                                         User friend = doc.getDocument().toObject(User.class).withId(friendID, i);
-
 
                                         for (int k = 0; k < listFriends.size(); k++) {
                                             if (friendID.matches(listFriends.get(k).getFriendID())){
                                                 listFriends2.put(i, friend);
                                                 i++;
-
-                                                //friendsRecycler.notifyDataSetChanged();
                                             }
-
                                         }
-
                                     }
                                 }
                                 friendsListCallback.onCallback(listFriends2);
                             }
                         });
-
             }
 
             @Override
@@ -170,18 +193,10 @@ public class RankingFragment extends Fragment {
                         int i = 0;
                         for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
                             if (doc.getType() == DocumentChange.Type.ADDED) {
-
-
-
                                 String friendID = doc.getDocument().getId();
                                 User friend = doc.getDocument().toObject(User.class).withId(friendID, i);
-
-                                //to do: ovde pribaviti sve podatke o prijateljima
-
                                 listFriends.put(i, friend);
                                 i++;
-
-
                             }
                         }
                         listFriends.put(listFriends.size(), new User(mAuth.getUid())); //dodajemo i sebe na kraj listte
@@ -189,9 +204,6 @@ public class RankingFragment extends Fragment {
                     }
                 });
     }
-
-
-
 
 
     public void sortirajSve(final FriendsListCallback friendsListCallback){
@@ -213,18 +225,8 @@ public class RankingFragment extends Fragment {
 
                                         String friendID = doc.getDocument().getId();
                                         User friend = doc.getDocument().toObject(User.class).withId(friendID, i);
-
-
-                                        //for (int k = 0; k < listFriends.size(); k++) {
-                                        //    if (friendID.matches(listFriends.get(k).getFriendID())){
-                                                listFriends2.put(i, friend);
-                                                i++;
-
-                                                //friendsRecycler.notifyDataSetChanged();
-                                        //    }
-
-                                        //}
-
+                                        listFriends2.put(i, friend);
+                                        i++;
                                     }
                                 }
                                 friendsListCallback.onCallback(listFriends2);

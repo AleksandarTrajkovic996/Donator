@@ -220,6 +220,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/linDonate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="2dp"
@@ -227,7 +228,7 @@
                     android:orientation="vertical">
 
                     <EditText
-                        android:id="@+id/numberDonateProducts1"
+                        android:id="@+id/numberDonateProducts"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -236,7 +237,7 @@
                         android:textSize="24sp" />
 
                     <TextView
-                        android:id="@+id/numberDonateProducts"
+                        android:id="@+id/numberDonateProducts222"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -246,6 +247,7 @@
 
 
                 <LinearLayout
+                    android:id="@+id/linNecessary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
@@ -253,7 +255,7 @@
                     android:orientation="vertical">
 
                     <EditText
-                        android:id="@+id/numberDonateProducts2"
+                        android:id="@+id/numberNecessaryProducts"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -262,7 +264,7 @@
                         android:textSize="24sp" />
 
                     <TextView
-                        android:id="@+id/numberNecessaryProducts"
+                        android:id="@+id/numberNecessaryProducts111"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -271,6 +273,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/linDonated"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
@@ -278,7 +281,7 @@
                     android:orientation="vertical">
 
                     <EditText
-                        android:id="@+id/numberDonateProducts3"
+                        android:id="@+id/numberDonatedProducts"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -287,7 +290,7 @@
                         android:textSize="24sp" />
 
                     <TextView
-                        android:id="@+id/numberDonatedProducts"
+                        android:id="@+id/numberDonatedProducts333"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -296,6 +299,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/linReceived"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
@@ -303,7 +307,7 @@
                     android:orientation="vertical">
 
                     <EditText
-                        android:id="@+id/numberDonateProducts4"
+                        android:id="@+id/numberReceivedProducts"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
@@ -312,11 +316,36 @@
                         android:textSize="24sp" />
 
                     <TextView
-                        android:id="@+id/numberReceivedProducts"
+                        android:id="@+id/numberReceivedProducts444"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:text="RECEIVED"
+                        android:textSize="14sp" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/linPoints"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <EditText
+                        android:id="@+id/points"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        android:text="0"
+                        android:textSize="24sp" />
+
+                    <TextView
+                        android:id="@+id/POINTS"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="POINTS"
                         android:textSize="14sp" />
                 </LinearLayout>
 
