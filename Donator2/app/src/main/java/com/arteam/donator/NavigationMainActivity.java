@@ -3,6 +3,8 @@ package com.arteam.donator;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
@@ -20,14 +22,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.io.IOException;
+import java.util.List;
 
 
 public class NavigationMainActivity extends AppCompatActivity
@@ -43,6 +50,7 @@ public class NavigationMainActivity extends AppCompatActivity
     private StorageReference storageReference;
     private byte[] bytesImg = null;
     private User user;
+    private LatLng latLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,34 +86,34 @@ public class NavigationMainActivity extends AppCompatActivity
                 .replace(R.id.nav_main, new RankingFragment())
                 .commit();
 
-        this.fillData();
+        this.fillData(new UserCallback() {
+            @Override
+            public void onCallback(User u) {
+                user = u;
+                latLng = getUserPosition();
+            }
+        });
 
     }
 
-    private void fillData(){
+    private void fillData(final UserCallback userCallback){
         String userID = mAuth.getUid();
 
 
-        firebaseFirestore.collection("Users").document(userID).get()
+        firebaseFirestore.collection("Users")
+                .document(userID)
+                .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
+                        User u = null;
                         if(task.isSuccessful()){
-
-                            if(task.getResult().exists()){
-
-                                String firstNameTmp = task.getResult().getString("first_name");
-                                String lastNameTmp = task.getResult().getString("last_name");
-                                final User u = task.getResult().toObject(User.class);
-                                user = u;
-                                fullNameNavigationMain.setText(firstNameTmp + " " + lastNameTmp);
-                            }else{
-
-                                Toast.makeText(NavigationMainActivity.this, R.string.error, Toast.LENGTH_SHORT).show();
-
-                            }
+                            String firstNameTmp = task.getResult().getString("first_name");
+                            String lastNameTmp = task.getResult().getString("last_name");
+                            u = task.getResult().toObject(User.class);
+                            fullNameNavigationMain.setText(firstNameTmp + " " + lastNameTmp);
                         }
+                        userCallback.onCallback(u);
                     }
                 });
 
@@ -123,6 +131,29 @@ public class NavigationMainActivity extends AppCompatActivity
 
 
     }
+
+    private LatLng getUserPosition(){
+        Geocoder coder = new Geocoder(this);
+        List<Address> address;
+        GeoPoint p1 = null;
+        Address location = null;
+        try {
+            address = coder.getFromLocationName(user.getAddress(), 5);
+            if (address == null) {
+                return null;
+            }
+            location = address.get(0);
+            if (location == null) {
+                return null;
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        LatLng centerRadius = new LatLng(location.getLatitude(), location.getLongitude());
+
+        return centerRadius;
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -155,6 +186,7 @@ public class NavigationMainActivity extends AppCompatActivity
         } else if (id == R.id.nav_map) {
             MapsFragment mapsFragment = new MapsFragment();
             mapsFragment.setUser(user);
+            mapsFragment.setLatLnt(latLng);
             fragmentManager.beginTransaction()
                     .replace(R.id.nav_main, mapsFragment)
                     .commit();

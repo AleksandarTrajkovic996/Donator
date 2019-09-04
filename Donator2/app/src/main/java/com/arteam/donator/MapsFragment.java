@@ -110,10 +110,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         this.getArticles();
-        getUserPosition();
 
-
-            btnSearch.setOnClickListener(new View.OnClickListener() {
+        btnSearch.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
@@ -202,12 +200,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                      if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                              && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                         googleMap.setMyLocationEnabled(true);
-                         //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
-
-                         if(centerRadius!=null){
-                             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
-                         }
+                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
                      }
                  }
                  return;
@@ -225,14 +218,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_ACCES_FINE_LOCATION);
 
-            googleMap.setMyLocationEnabled(true);
+           // googleMap.setMyLocationEnabled(true);
 
-            if(centerRadius!=null){
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
-            }
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
 
         } else {
-
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
         }
 
     }
@@ -275,26 +266,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                             }
                         }
                     });
-    }
-
-    public void setUser(User u){
-        this.userMAIN = u;
-    }
-
-    private void getUser(){
-        firebaseFirestore.collection("Users")
-             .document(mAuth.getCurrentUser().getUid())
-             .get()
-             .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                 @Override
-                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
-                     if(task.isSuccessful()){
-                         userMAIN = task.getResult().toObject(User.class);
-                     }
-                 }
-
-             });
     }
 
     private boolean isThere(String data){
@@ -492,26 +463,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
-    private void getUserPosition(){
-        Geocoder coder = new Geocoder(getActivity());
-        List<Address> address;
-        GeoPoint p1 = null;
-        Address location = null;
-        try {
-            address = coder.getFromLocationName(userMAIN.getAddress(), 5);
-            if (address == null) {
-                return;
-            }
-            location = address.get(0);
-            if (location == null) {
-                return;
-            }
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        centerRadius = new LatLng(location.getLatitude(), location.getLongitude());
-        refresh();
-    }
+    public void setUser(User u) {this.userMAIN = u;}
+
+    public void setLatLnt(LatLng l) { this.centerRadius = l; }
 
     private void drawCircle(int radius){
 
