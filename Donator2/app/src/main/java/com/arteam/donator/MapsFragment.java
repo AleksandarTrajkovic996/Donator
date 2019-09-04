@@ -38,7 +38,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
@@ -86,7 +85,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private String clickedArticleId ="";
     private String clickedUserID = "";
     private String clickedArticleName = "";
-
+    boolean mLocationPermissionGranted = false;
 
     @Nullable
     @Override
@@ -199,10 +198,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                      if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                              && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
+                         mLocationPermissionGranted = true;
                          googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
+
                      }
                  }
-                 return;
              }
          }
     }
@@ -217,14 +217,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_ACCES_FINE_LOCATION);
 
-           // googleMap.setMyLocationEnabled(true);
-
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
 
         } else {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
         }
-
     }
 
     private void searchDataAndType(final String data, final String searchingForType){
