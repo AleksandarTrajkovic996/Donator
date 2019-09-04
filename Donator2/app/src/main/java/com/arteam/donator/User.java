@@ -11,9 +11,6 @@ public class User extends UserID {
     private String country;
     private String phone_number;
 
-
-    private String points;
-
     public User(){ }
 
     public User(String first_name, String last_name, String address, String country, String phone_number, String fID) {
@@ -72,13 +69,4 @@ public class User extends UserID {
     public void setPhone_number(String phone_number) {
         this.phone_number = phone_number;
     }
-
-    public String getPoints() {
-        return points;
-    }
-
-    public void setPoints(String points) {
-        this.points = points;
-    }
-
 }
