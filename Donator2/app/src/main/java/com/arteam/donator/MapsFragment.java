@@ -177,7 +177,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-
         return view;
     }
 
@@ -302,55 +301,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     }
                 });
 
-    }
-
-    private void searchType(final String type) {
-
-        List<Article> tmpList = new ArrayList<>();
-        markerPlaceIdMap = new HashMap<Marker, String>();
-
-        if (type.matches("necessary") && NecessaryArticles.size() > 0) {
-            tmpList = NecessaryArticles;
-        } else if (type.matches("donate") && DonateArticles.size() > 0) {
-            tmpList = DonateArticles;
-        }
-
-        if(tmpList.size()>0) {
-            final List<Article> finalTmpList = tmpList;
-            firebaseFirestore.collection("Users") //obilaze se svi useri
-                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                        @Override
-                        public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-                            int i = 0;
-                            for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) { //foreach petlja kroz Users
-
-
-                                if (doc.getType() == DocumentChange.Type.ADDED) {
-                                    final String userID = doc.getDocument().getId();
-                                    final User user = doc.getDocument().toObject(User.class).withId(userID, i);
-                                    ++i;
-
-                                    if(!userID.matches(mAuth.getCurrentUser().getUid())) {
-                                        for (Article a : finalTmpList) { //finalTmpList i tmpList su iste, a sadrze ili listu potrebnih stvari, ili listu stvari za doniranje
-                                            firebaseFirestore.collection("Users/" + userID + "/Articles").whereEqualTo("type", SearchingFor).whereEqualTo("name", a.name)
-                                                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                                        @Override
-                                                        public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-
-                                                            int con = queryDocumentSnapshots.size();
-                                                            if(con>0){
-                                                                addMarker(user);
-                                                            }
-                                                        }
-                                                    });
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    });
-        }
     }
 
     @Override

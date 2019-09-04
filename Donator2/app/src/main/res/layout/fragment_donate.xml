@@ -14,12 +14,12 @@
         android:id="@+id/relAddArticle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:layout_gravity="center"
         android:background="#d1eff9"
         android:theme="@style/Theme.AppCompat.Light.Dialog"
         android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints">
 
 
@@ -146,6 +146,7 @@
             app:srcCompat="@drawable/hand_heart_donate_icon" />
 
     </RelativeLayout>
+
 
     <RelativeLayout
         android:id="@+id/relViewArticle"
