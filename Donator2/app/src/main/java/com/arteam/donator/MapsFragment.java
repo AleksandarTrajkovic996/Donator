@@ -3,6 +3,7 @@ package com.arteam.donator;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -10,9 +11,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.ConstraintSet;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,11 +22,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -34,9 +38,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -49,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static android.support.constraint.Constraints.TAG;
 
@@ -76,6 +83,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private EditText searchBar;
     private LatLng centerRadius = null;
     private User userMAIN;
+    private String clickedArticleId ="";
+    private String clickedUserID = "";
+    private String clickedArticleName = "";
 
 
     @Nullable
@@ -95,6 +105,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         linearLayoutScrol = scrollViewMap.findViewById(R.id.linearLayoutScrollMap);
         btnCancel = view.findViewById(R.id.btnCancelOfferOrAskMaps);
         btnOK = view.findViewById(R.id.btnOfferOrAskMaps);
+
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         this.getArticles();
         getUserPosition();
@@ -122,6 +135,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             public void onClick(View v) {
                 constraintBigMap.setVisibility(View.INVISIBLE);
                 linearLayoutScrol.removeAllViews();
+                clickedArticleId="";
+                clickedUserID = "";
             }
         });
 
@@ -129,6 +144,38 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
 
+                if(!clickedArticleId.isEmpty()) {
+
+                    final Map<String, String> request = new HashMap<>();
+
+                    if(SearchType.matches("donate")){ //korisnik moze da donira
+                        ArrayList<Article> articleArrayList = new ArrayList<>();
+                        String[] cmp = clickedArticleName.split(", ");
+                        for(Article a : DonateArticles){
+                            if(a.getName().matches(cmp[0]) && a.getSize().matches(cmp[1])){
+                                articleArrayList.add(a);
+                            }
+                        }
+                        offerArticles(articleArrayList, clickedUserID);
+
+                    }else{ //korisnik moze da trazi
+                        ArrayList<Article> articleArrayList = new ArrayList<>();
+                        String[] cmp = clickedArticleName.split(", ");
+                        boolean alreadyInNecessaryList = false;
+                        for(Article a : NecessaryArticles){
+                            if(a.getName().matches(cmp[0]) && a.getSize().matches(cmp[1])){
+                                alreadyInNecessaryList = true;
+                            }
+                        }
+                        askForArticle(clickedArticleId, clickedUserID, alreadyInNecessaryList);
+                    }
+                }else{
+                    Toast.makeText(getActivity(), "You have to choose one article!", Toast.LENGTH_SHORT).show();
+                }
+                constraintBigMap.setVisibility(View.INVISIBLE);
+                linearLayoutScrol.removeAllViews();
+                clickedArticleId="";
+                clickedUserID = "";
             }
         });
 
@@ -155,8 +202,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                      if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                              && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                           // googleMap.setMyLocationEnabled(true);
+                         googleMap.setMyLocationEnabled(true);
+                         //googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
 
+                         if(centerRadius!=null){
+                             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
+                         }
                      }
                  }
                  return;
@@ -171,9 +222,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
+
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_ACCES_FINE_LOCATION);
 
-            //googleMap.setMyLocationEnabled(true);
+            googleMap.setMyLocationEnabled(true);
+
+            if(centerRadius!=null){
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
+            }
 
         } else {
 
@@ -223,6 +279,22 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     public void setUser(User u){
         this.userMAIN = u;
+    }
+
+    private void getUser(){
+        firebaseFirestore.collection("Users")
+             .document(mAuth.getCurrentUser().getUid())
+             .get()
+             .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                 @Override
+                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                     if(task.isSuccessful()){
+                         userMAIN = task.getResult().toObject(User.class);
+                     }
+                 }
+
+             });
     }
 
     private boolean isThere(String data){
@@ -395,25 +467,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             markerPlaceIdMap.put(marker, u.userID);
         }
 
+
+
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-//                Bundle bundle = new Bundle();
-//                String uid = markerPlaceIdMap.get(marker);
-//                bundle.putString("userID", uid);
-//                ProfileFragment profileFragment = new ProfileFragment();
-//                profileFragment.setArguments(bundle);
-//
-//                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-//                fragmentManager.beginTransaction()
-//                        .replace(R.id.nav_main, profileFragment)
-//                        .commit();
-
                 String uid = markerPlaceIdMap.get(marker);
+                clickedUserID = uid;
                 returnUserArticles(uid, SearchedText, new ArticleListCallback() {
                     @Override
                     public void onCallback(List<Article> list) {
-                        Log.i("Article", String.valueOf(list.size()));
                         if (list.size()>0) {
                             showArticles(list);
                             constraintBigMap.setVisibility(View.VISIBLE);
@@ -424,6 +487,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 return true;
             }
         });
+
+
 
     }
 
@@ -445,6 +510,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             e1.printStackTrace();
         }
         centerRadius = new LatLng(location.getLatitude(), location.getLongitude());
+        refresh();
     }
 
     private void drawCircle(int radius){
@@ -467,9 +533,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         return false;
     }
 
-    private void returnUserArticles(String userID,String nameA, final ArticleListCallback articleListCallback) {
-        tmp = new ArrayList<Article>();
+    private void returnUserArticles(String userID, String nameA, final ArticleListCallback articleListCallback) {
 
+        tmp = new ArrayList<Article>();
 
         //final CountDownLatch countDownLatch = new CountDownLatch(1);
         firebaseFirestore.collection("Users/" + userID + "/Articles")
@@ -498,28 +564,152 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
-    private void showArticles(List<Article> articles){
+    private void showArticles(final List<Article> articles){
 
         if(constraintBigMap.getVisibility() == View.INVISIBLE) {
             for (int i = 0; i < articles.size(); ++i) {
                 String ID_1 = articles.get(i).articleID;
 
-                Button button = new Button(getActivity());
-                button.setText(articles.get(i).name + ",  " + articles.get(i).size);
+                final ToggleButton button = new ToggleButton(getActivity());
+                String ns = articles.get(i).name + ", " + articles.get(i).size;
+
+                button.setText(ns);
+                button.setTextOn(ns);
+                button.setTextOff(ns);
                 button.setTag(ID_1);
                 button.setId(i);
+
                 linearLayoutScrol.addView(button);
+
+            }
+            if(SearchingFor.matches("donate")){
+                btnOK.setText("ASK");
+            }else{
+                btnOK.setText("OFFER");
             }
         }else{
             Toast.makeText(getActivity(), "You need to close the window first!", Toast.LENGTH_SHORT).show();
         }
 
+
+        //pribavljaju se svi ToggleButton-i koji se prikazuju u LinearLayout-u
+        int viewsInLinLayCount = linearLayoutScrol.getChildCount();
+        for(int i=0; i<viewsInLinLayCount; i++){
+
+            final ToggleButton buttonChild = (ToggleButton) linearLayoutScrol.getChildAt(i); //izdvaja se svaki ToggleButton posebno
+
+            buttonChild.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() { //stavlja se listener
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(isChecked){
+
+                        int btnId = buttonChild.getId();
+
+                        for(int k = 0; k<articles.size(); k++){ //svi ostali se gase
+                            if(k!=btnId){
+                            ToggleButton tb = (ToggleButton) linearLayoutScrol.getChildAt(k);
+                            tb.setChecked(false);
+                            }
+                            clickedArticleId = (String) buttonChild.getTag();
+                            clickedArticleName = (String) buttonChild.getText();
+                        }
+                        buttonView.setBackgroundColor(Color.BLUE);
+                    }else{
+                        buttonView.setBackgroundColor(Color.LTGRAY);
+                        clickedArticleId = "";
+                    }
+                }
+            });
+
+
+
+        }
+
+
+
+
+    }
+
+    private void offerArticles(List<Article> listArticles, String userID){
+
+        for (int i = 0; i < listArticles.size(); i++) { //saljemo sve ponude koje imamo
+            String tmp = getNewID();
+            final Map<String, String> request = new HashMap<>();
+            request.put("fromID", mAuth.getCurrentUser().getUid());
+            request.put("articleID", listArticles.get(i).articleID);
+            request.put("type", "active-offer");
+
+            firebaseFirestore.collection("Users/" + userID + "/Requests").document(tmp).set(request);
+
+
+            final Map<String, String> notificationOffer = new HashMap<>();
+            notificationOffer.put("text", "Imate novu ponudu");
+
+            firebaseFirestore.collection("Users/" + userID + "/Notifications").document(tmp).set(notificationOffer); //id ce da budi isti kao i kod request-a
+        }
+
+    }
+
+    private void askForArticle(String askArticleID, String userIdClicked, boolean isInList){
+
+        final Map<String, String> request = new HashMap<>();
+        request.put("type", "active-ask");
+        request.put("fromID", mAuth.getCurrentUser().getUid());
+        request.put("articleID", askArticleID);
+
+        String tmp = getNewID();
+        String[] articleNameAndSize = clickedArticleName.split(", ");
+        firebaseFirestore.collection("Users/" + userIdClicked + "/Requests").document(tmp).set(request);
+
+        final Map<String, String> notificationAsked = new HashMap<>();
+        notificationAsked.put("text", "Od Vas se trazi: " + articleNameAndSize[0] + ", " + articleNameAndSize[1]);
+
+        firebaseFirestore.collection("Users/" + userIdClicked + "/Notifications").document(tmp).set(notificationAsked); //id ce da budi isti kao i kod request-a
+
+        if(!isInList){//ako nije u listi, mora da se kreira kod sebe u listi necessary
+
+            firebaseFirestore.collection("Users/" + userIdClicked + "/Articles").document(askArticleID).get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if(task.isSuccessful()){
+
+                                Article a = task.getResult().toObject(Article.class);
+
+                                final Map<String, String> articleForAdd = new HashMap<>();
+                                articleForAdd.put("name", a.name);
+                                articleForAdd.put("size", a.size);
+                                articleForAdd.put("description", a.description);
+                                articleForAdd.put("type", "necessary");
+
+                                String tmpN = getNewID();
+                                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(tmpN).set(articleForAdd);
+
+                            }else{
+
+                            }
+                        }
+                    });
+        }
+    }
+
+    public String getNewID(){
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = generator.nextInt((15 - 10) + 1) + 10;
+        char tempChar;
+        for (int i = 0; i < randomLength; i++){
+            tempChar = (char) (generator.nextInt(96) + 32);
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString();
     }
 
     private void refresh(){
         if(googleMap!=null) {
             googleMap.clear();
             onMapReady(this.googleMap);
+
         }
 
     }

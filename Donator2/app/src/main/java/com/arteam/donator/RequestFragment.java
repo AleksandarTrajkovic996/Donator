@@ -154,30 +154,4 @@ public class RequestFragment extends Fragment {
 
         return view;
     }
-
-    private void fillData(final String uID, final String type){ //mAuth.getCurrentUser().getUid()
-        firebaseFirestore.collection("Users/" + uID + "/Requests")
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-                        int i = 0;
-                        for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                            if (doc.getType() == DocumentChange.Type.ADDED) {
-
-                                String requestID = doc.getDocument().getId();
-                                Request request = doc.getDocument().toObject(Request.class).withId(requestID, i);
-
-                                //if(request.getType().matches(type)){
-                                listRequests.put(i, request);
-                                i++;
-                                requestRecycler.userID = uID;
-                                requestRecycler.notifyDataSetChanged();
-
-                                //}
-                            }
-                        }
-                    }
-                });
-    }
-
 }

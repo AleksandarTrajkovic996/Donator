@@ -554,6 +554,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                     });
         }
     }
+
     public void treca() {
         if (listPomOne.size() == 1 && listArticlesForOffer.size() > 0) {
 
