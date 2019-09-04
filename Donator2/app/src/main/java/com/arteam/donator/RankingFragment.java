@@ -30,8 +30,8 @@ public class RankingFragment extends Fragment {
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
     private RecyclerView recyclerView;
-    private Map<Integer, User> listFriends;
     private Map<Integer, User> listFriends2;
+    private Map<Integer, User> listFriends;
     private UserRecycler friendsRecycler;
 
     @Nullable
