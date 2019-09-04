@@ -46,4 +46,12 @@ public class Article extends ArticleID {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
 }

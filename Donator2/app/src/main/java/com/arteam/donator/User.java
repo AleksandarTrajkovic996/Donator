@@ -2,7 +2,7 @@ package com.arteam.donator;
 
 
 
-public class User extends UserID implements Comparable<User> {
+public class User extends UserID {
 
     private String friendID;
     private String first_name;
@@ -10,13 +10,8 @@ public class User extends UserID implements Comparable<User> {
     private String address;
     private String country;
     private String phone_number;
-    private String points;
-
 
     public User(){ }
-    public User(String fId){
-        friendID = fId;
-    }
 
     public User(String first_name, String last_name, String address, String country, String phone_number, String fID) {
         this.first_name = first_name;
@@ -26,15 +21,6 @@ public class User extends UserID implements Comparable<User> {
         this.phone_number = phone_number;
         this.friendID = fID;
     }
-
-    public String getPoints() {
-        return points;
-    }
-
-    public void setPoints(String points) {
-        this.points = points;
-    }
-
 
     public String getFriendID() {
         return friendID;
@@ -82,10 +68,5 @@ public class User extends UserID implements Comparable<User> {
 
     public void setPhone_number(String phone_number) {
         this.phone_number = phone_number;
-    }
-
-    @Override
-    public int compareTo(User user) {
-        return (int)(Integer.parseInt(this.points) - Integer.parseInt(user.getPoints()));
     }
 }

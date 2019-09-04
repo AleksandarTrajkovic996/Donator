@@ -16,7 +16,6 @@ import android.support.v4.widget.DrawerLayout;
 
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -121,6 +120,8 @@ public class NavigationMainActivity extends AppCompatActivity
             }
         }) ;
 
+
+
     }
 
     @Override
@@ -154,7 +155,6 @@ public class NavigationMainActivity extends AppCompatActivity
         } else if (id == R.id.nav_map) {
             MapsFragment mapsFragment = new MapsFragment();
             mapsFragment.setUser(user);
-
             fragmentManager.beginTransaction()
                     .replace(R.id.nav_main, mapsFragment)
                     .commit();
