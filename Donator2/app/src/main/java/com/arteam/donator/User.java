@@ -82,6 +82,6 @@ public class User extends UserID implements Comparable<User> {
 
     @Override
     public int compareTo(User user) {
-        return 0;
+        return (int)(Integer.parseInt(this.points) - Integer.parseInt(user.getPoints()));
     }
 }
