@@ -30,9 +30,14 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
 
 
     private Map<Integer,User> list;
+    private Map<Integer,User> list2;
 
     public UserRecycler (Map<Integer, User> map){
         this.list = map;
+    }
+    public UserRecycler (Map<Integer, User> map, Map<Integer, User> map2){
+        this.list = map;
+        this.list2 = map2;
     }
 
     @NonNull
@@ -52,8 +57,10 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
         final String userId = list.get(i).userID;
 
         final String first_name = list.get(i).getFirst_name();
+        final String last_name = list.get(i).getLast_name();
 
-        holder.setTxtDisplay(first_name);
+
+        holder.setTxtDisplay(first_name, last_name);
 
         holder.one_data_user.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,11 +103,11 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
         }
 
 
-            public void setTxtDisplay (String txt){
+            public void setTxtDisplay (String txt, String txt2){
 
             txtDisplay = view.findViewById(R.id.txtDisplay);
 
-            txtDisplay.setText(txt);
+            txtDisplay.setText(txt + " " + txt2);
         }
     }
 }

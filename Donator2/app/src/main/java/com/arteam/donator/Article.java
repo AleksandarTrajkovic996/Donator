@@ -2,7 +2,7 @@ package com.arteam.donator;
 
 public class Article extends ArticleID {
 
-    public String type, name, size, description;
+    public String type, name, size, description, value;
     //type: donate, necessary, donated, received
 
     public Article(){

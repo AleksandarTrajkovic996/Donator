@@ -50,7 +50,7 @@ public class NecessaryFragment extends Fragment {
     private TextView txtDescription;
     FloatingActionButton fab;
     private boolean relLayoutActive;
-
+    private Map<String, String> listOfValue;
 
 
     private boolean relViewLayoutActive;
@@ -90,7 +90,15 @@ public class NecessaryFragment extends Fragment {
         linearLayout5 = view.findViewById(R.id.linOk);//ok kad se prikazuje samo - novo!!!
         relViewArticle = view.findViewById(R.id.relViewArticle); //novo!!!
 
-
+        listOfValue = new HashMap<>();
+        listOfValue.put("patike", "5");
+        listOfValue.put("jakna", "10");
+        listOfValue.put("pantalone", "4");
+        listOfValue.put("kosulja", "4");
+        listOfValue.put("bluza", "3");
+        listOfValue.put("majica", "2");
+        listOfValue.put("bunda", "12");
+        listOfValue.put("default", "5");
 
         recyclerView = view.findViewById(R.id.listArticleRecycler);
 
@@ -186,7 +194,10 @@ public class NecessaryFragment extends Fragment {
                 articleForAdd.put("size", txtSize.getText().toString());
                 articleForAdd.put("description", txtDescription.getText().toString());
                 articleForAdd.put("type", "necessary");
-
+                if (listOfValue.get(txtName.getText().toString()) != null)
+                    articleForAdd.put("value", listOfValue.get(txtName.getText().toString()));
+                else
+                    articleForAdd.put("value", listOfValue.get("default"));
 
                 String tmp = getNewID();
 

@@ -36,7 +36,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -69,7 +71,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     public Uri imageUri;
     private String type;
     public String userID = null;
-
+    public ArrayList<Article> tmp;
 
     //u DonateFragment objasnjeno cemu sta sluzi
     private RelativeLayout relViewArticle;
@@ -420,10 +422,17 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                     //ove dve funkcije sluze da sinhronizuju nenormalno ponasanje listenera
 
                                     //artikl na koji smo kliknuli, uporedjujemo njegov naziv i velicinu uporedili sa istima u svojim artiklima
-                                    druga();
+                                    druga(new ArticleListCallback() {
+                                        @Override
+                                        public void onCallback(List<Article> list) {
+                                            //sve artikle koje smo nasli u funkciji druga() dodajemo u zahteve kod onog kome nudimo
+                                            treca();
+                                        }
 
-                                    //sve artikle koje smo nasli u funkciji druga() dodajemo u zahteve kod onog kome nudimo
-                                    treca();
+
+                                    });
+
+
 
                                 }
 
@@ -530,7 +539,9 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
 
     }
 
-    public void druga() {
+    public void druga(final ArticleListCallback articleListCallback) {
+        tmp = new ArrayList<Article>();// ovo bezveze stoji tu da bi se ispostovao parametar
+
         if (listPomOne.size() == 1 && listArticlesForOffer.size() == 0) {
             firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles")
                     .whereEqualTo("name", listPomOne.get(0).name).whereEqualTo("size", listPomOne.get(0).size).whereEqualTo("type", "donate")
@@ -546,7 +557,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                     Article article = document.toObject(Article.class).withId(articleID, 0);
                                     listArticlesForOffer.put(i++, article);
                                 }
-
+                                articleListCallback.onCallback(tmp);
                             } else {
                                 Log.d(TAG, "Error getting documents: ", task.getException());
                             }
@@ -607,6 +618,9 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
             listPomOne.clear();
         }
     }
+
+
+
 
     @Override
     public int getItemCount() {

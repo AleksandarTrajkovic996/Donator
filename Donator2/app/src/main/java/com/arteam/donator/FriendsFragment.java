@@ -10,8 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -48,6 +51,57 @@ public class FriendsFragment extends Fragment {
         recyclerView.setAdapter(friendsRecycler);
 
 
+        pribaviPrijatelje(new FriendsListCallback() {
+            @Override
+            public void onCallback() {
+
+                for (int i = 0; i < listFriends.size(); i++){
+
+                    final int b = i;
+                    firebaseFirestore.collection("Users").document(listFriends.get(i).getFriendID()).get()
+                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                                    if (task.isSuccessful()) {
+
+                                        if (task.getResult().exists()) {
+
+                                            User user = task.getResult().toObject(User.class);
+
+
+                                            listFriends.put(b, user);
+
+
+                                            friendsRecycler.notifyDataSetChanged();
+                                        } else {
+
+                                        }
+
+                                    } else {
+
+                                    }
+
+
+                                }
+                            });
+
+
+                }
+            }
+
+            @Override
+            public void onCallback(Map<Integer, User> l) {
+
+            }
+        });
+
+
+
+        return view;
+    }
+
+    public void pribaviPrijatelje(final FriendsListCallback friendsListCallback){
         firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Friends")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -65,18 +119,14 @@ public class FriendsFragment extends Fragment {
 
                                 listFriends.put(i, friend);
                                 i++;
-                                friendsRecycler.notifyDataSetChanged();
+
 
                             }
                         }
+
+                        friendsListCallback.onCallback();
                     }
                 });
-
-
-
-        return view;
     }
-
-
 
 }

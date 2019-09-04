@@ -120,6 +120,13 @@ public class DonateFragment extends Fragment {
 
         listOfValue = new HashMap<>();
         listOfValue.put("patike", "5");
+        listOfValue.put("jakna", "10");
+        listOfValue.put("pantalone", "4");
+        listOfValue.put("kosulja", "4");
+        listOfValue.put("bluza", "3");
+        listOfValue.put("majica", "2");
+        listOfValue.put("bunda", "12");
+        listOfValue.put("default", "5");
 
         articleRecycler = new ArticleRecycler(imageDonate, listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3,
                                                 relViewArticle, linearLayout4, linearLayout5, btnAsk, btnOk3, btnCancel2, txtDescription2, "donate");
@@ -170,6 +177,10 @@ public class DonateFragment extends Fragment {
                 articleForAdd.put("size", txtSize.getText().toString());
                 articleForAdd.put("description", txtDescription.getText().toString());
                 articleForAdd.put("type", "donate");
+                if (listOfValue.get(txtName.getText().toString()) != null)
+                    articleForAdd.put("value", listOfValue.get(txtName.getText().toString()));
+                else
+                    articleForAdd.put("value", listOfValue.get("default"));
 
 
                 String tmp = getNewID();
