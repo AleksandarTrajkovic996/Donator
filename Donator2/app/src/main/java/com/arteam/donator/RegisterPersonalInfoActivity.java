@@ -88,6 +88,7 @@ public class RegisterPersonalInfoActivity extends AppCompatActivity  implements 
         mapObjekat.put("country", country_user);
         mapObjekat.put("address", address_user);
         mapObjekat.put("phone_number", phone_number_user);
+        mapObjekat.put("points", "0");
 
         progressBar.setVisibility(View.VISIBLE);
 

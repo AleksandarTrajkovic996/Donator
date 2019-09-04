@@ -67,7 +67,7 @@ public class FriendsFragment extends Fragment {
 
                                         if (task.getResult().exists()) {
 
-                                            User user = task.getResult().toObject(User.class);
+                                            User user = task.getResult().toObject(User.class).withId(listFriends.get(b).getFriendID(), 0);
 
 
                                             listFriends.put(b, user);

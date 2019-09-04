@@ -25,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -73,6 +74,7 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
         final String desc = listA.get(position).getDescription();
         final String typeArticle = listA.get(position).getType();
         final String articleId = listA.get(position).articleID;
+        final String value = listA.get(position).getValue();
 
         final String typeRequest = list.get(position).getType();
         final String fromId = list.get(position).getFromID();
@@ -90,6 +92,16 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
                 String tmp = getNewID();
 
                 if (typeRequest.matches("active-ask")){//nesto mi traze
+
+                    //update points
+                    nabaviUsera(mAuth.getUid(), new UserCallback() {
+                        @Override
+                        public void onCallback(User user) {
+                            firebaseFirestore.collection("Users").document(mAuth.getUid())
+                                    .update("points", Integer.toString(Integer.parseInt(user.getPoints()) + Integer.parseInt(value)));
+                        }
+                    });
+
 
                     //donate->donated
                     firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(articleId)
@@ -130,6 +142,15 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
                 }
                 //active-offer
                 else{ //nesto mi nude
+
+                    //update points
+                    nabaviUsera(fromId, new UserCallback() {
+                        @Override
+                        public void onCallback(User user) {
+                            firebaseFirestore.collection("Users").document(fromId)
+                                    .update("points", Integer.toString(Integer.parseInt(user.getPoints()) + Integer.parseInt(value)));
+                        }
+                    });
 
                     //necessary->received
                     firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles")
@@ -262,6 +283,27 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
                         .commit();
             }
         });
+    }
+
+
+
+    public void nabaviUsera(String uid, final UserCallback userCallback) {
+            firebaseFirestore.collection("Users").document(uid)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+
+                                User usr = task.getResult().toObject(User.class);
+
+                                userCallback.onCallback(usr);
+                            } else {
+                                Log.d(TAG, "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+
     }
 
     @Override
