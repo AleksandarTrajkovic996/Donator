@@ -2,6 +2,8 @@ package com.arteam.donator;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -10,12 +12,15 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +29,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
@@ -34,6 +41,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -77,14 +85,14 @@ public class DonateFragment extends Fragment {
     private boolean relAddLayoutActive;
     private boolean relViewLayoutActive;
     private Map<String, String> listOfValue;
-
-
+    private RecyclerView contentDonate;
 
     @SuppressLint("RestrictedApi")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_donate, container, false);
+
 
         relAddLayoutActive = false;
         relViewLayoutActive = false;   //novo!!!
@@ -107,10 +115,9 @@ public class DonateFragment extends Fragment {
         linearLayout5 = view.findViewById(R.id.linOk);//ok kad se prikazuje samo - novo!!!
         fab = view.findViewById(R.id.fab);
 
+
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
-
-
         recyclerView = view.findViewById(R.id.listArticleRecycler);
 
 
@@ -132,8 +139,10 @@ public class DonateFragment extends Fragment {
         articleRecycler = new ArticleRecycler(imageDonate, listArticles, relAddArticle, txtName, txtSize, txtDescription, btnOk, btnOk2, btnCancel, fab, linearLayout2, linearLayout3,
                                                 relViewArticle, linearLayout4, linearLayout5, btnAsk, btnOk3, btnCancel2, txtDescription2, "donate");
 
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(container.getContext());
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), linearLayoutManager.getOrientation());
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.addItemDecoration(dividerItemDecoration);
         recyclerView.setAdapter(articleRecycler);
 
 
@@ -158,6 +167,7 @@ public class DonateFragment extends Fragment {
             }
         });
 
+        //odustajanje
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -170,6 +180,8 @@ public class DonateFragment extends Fragment {
             }
         });
 
+
+        //dodavanje artikla u bazi
         final Map<String, String> articleForAdd = new HashMap<>();
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,31 +196,38 @@ public class DonateFragment extends Fragment {
                     articleForAdd.put("value", listOfValue.get("default"));
 
 
+                //dodavanje artikla i slike sa istim ID-em
                 String tmp = getNewID();
+                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(tmp).set(articleForAdd)
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i("Donate", "Neuspesno dodavanje artikla");
+                            }
+                        })
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.i("Donate", "Uspesno dodavanje artikla");
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                fragmentManager.beginTransaction()
+                                        .replace(R.id.nav_main, new DonateFragment(), "Donate_Fragment_TAG")
+                                        .commit();
+                            }
+                });
 
-                firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(tmp).set(articleForAdd);
-
-                if(imageUri != null)
-                {
-                    StorageReference ref = storageReference.child("article_images/" + tmp);
-                    ref.putFile(imageUri);
-                }
-
+                writeImageOnStorage(tmp);
 
                 relAddArticle.setVisibility(View.INVISIBLE);
                 linearLayout2.setVisibility(View.INVISIBLE);
                 linearLayout3.setVisibility(View.INVISIBLE);
                 recyclerView.setEnabled(true);
                 relAddLayoutActive =false;
-
-
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, new DonateFragment())
-                        .commit();
             }
         });
 
+
+        //popunjavanje podataka drugog korisnika
         Bundle bundle = getArguments();
         if(bundle!=null){
             userID = bundle.getString("userID");
@@ -216,11 +235,13 @@ public class DonateFragment extends Fragment {
             this.fillData(userID, userType);
         }
 
+        //zabrana fab-u
         if(userID != null)
             if(!mAuth.getCurrentUser().getUid().matches(userID) || userType.matches("donated") || userType.matches("received")) {
                 fab.setVisibility(View.INVISIBLE);
           }
 
+        //biranje slike
         if(imageUri==null && bundle == null) {
             imageDonate.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -237,6 +258,7 @@ public class DonateFragment extends Fragment {
             });
         }
 
+        //popunjavanje svojih podataka iz baze
         if(bundle==null){
             this.fillData(mAuth.getCurrentUser().getUid(), "donate");
         }
@@ -246,26 +268,45 @@ public class DonateFragment extends Fragment {
         return view;
     }
 
-    private void fillData(final String uID, final String type){ //mAuth.getCurrentUser().getUid()
+    private void fillData(final String uID, final String type){
         firebaseFirestore.collection("Users/" + uID + "/Articles")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
                         int i = 0;
                         for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                            if (doc.getType() == DocumentChange.Type.ADDED) {
+                            String articleID = doc.getDocument().getId();
+                            Article article = doc.getDocument().toObject(Article.class).withId(articleID, i);
 
-                                String articleID = doc.getDocument().getId();
-                                Article article = doc.getDocument().toObject(Article.class).withId(articleID, i);
-
-                                if(article.getType().matches(type)){
-                                    listArticles.put(i, article);
-                                    i++;
-                                    articleRecycler.userID = uID;
-                                    articleRecycler.notifyDataSetChanged();
-
-                                }
+                            switch (doc.getType()) {
+                                case ADDED:
+                                    if (article.getType().matches(type)) {
+                                        Log.i(type, "Added");
+                                        listArticles.put(i, article);
+                                        i++;
+                                        articleRecycler.userID = uID;
+                                        articleRecycler.notifyDataSetChanged();
+                                    }
+                                    break;
+                                case MODIFIED:
+                                    if(!article.getType().matches(type)) {
+                                        //promenio se tip u medjuvremenu, npr. korisnik je u svoje 'donate' artikle, neko je prihvatio jedan njegov artikl, tada se menja tip: donate -> donated
+                                        Log.i(type, "Modified");
+                                        listArticles.remove(article);
+                                        articleRecycler.userID = uID;
+                                        //ostaje refresh prikaza!!!!
+                                        articleRecycler.notifyItemRemoved(article.id);
+                                        articleRecycler.notifyItemRangeChanged(article.id, listArticles.size());
+                                        articleRecycler.notifyDataSetChanged();
+                                    }
+                                    break;
+                                case REMOVED:
+                                    if (article.getType().matches(type)) {
+                                        Log.i(type, "Removed");
+                                    }
+                                    break;
                             }
+
                         }
                     }
                 });
@@ -293,6 +334,30 @@ public class DonateFragment extends Fragment {
         return randomStringBuilder.toString();
     }
 
+    private void writeImageOnStorage(String id){
+
+        if(imageUri != null)
+        {
+            StorageReference ref = storageReference.child("article_images/" + id);
+            UploadTask uploadTask = ref.putFile(imageUri);
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.i("Article", "Neuspesno dodavanje slike artikla");
+                    Toast.makeText(getActivity(), "Something is wrong, try again to add photo!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Log.i("Article", "Uspesno dodata slika artikla");
+                }
+            });
+
+        }
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -308,8 +373,6 @@ public class DonateFragment extends Fragment {
                     e.printStackTrace();
                 }
                 imageDonate.setImageBitmap(bitmap);
-//                articleRecycler.imageUri = this.imageUri;
-//                articleRecycler.notifyDataSetChanged();
             }
         }
     }

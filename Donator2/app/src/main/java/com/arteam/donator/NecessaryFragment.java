@@ -8,8 +8,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
@@ -111,9 +114,12 @@ public class NecessaryFragment extends Fragment {
                         relViewArticle, linearLayout4, linearLayout5, btnOffer, btnOk3, btnCancel2, txtDescription2,"necessary");
 
 
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(container.getContext()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(container.getContext());
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), linearLayoutManager.getOrientation());
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.addItemDecoration(dividerItemDecoration);
         recyclerView.setAdapter(articleRecycler);
+
 
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -148,6 +154,7 @@ public class NecessaryFragment extends Fragment {
         final String userID1;
         String userType;
 
+        //postavljaju se promenljive, da li je korisnik usao kod svoje potrebne stvari ili kod nekog drugog korisnika
         Bundle bundle = getArguments();
         if(bundle!=null){
             userID = bundle.getString("userID");
@@ -162,30 +169,47 @@ public class NecessaryFragment extends Fragment {
             fab.setVisibility(View.INVISIBLE);
         }
 
+
+        //popunjavanje podataka
         firebaseFirestore.collection("Users/" + userID + "/Articles")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
                         int i = 0;
                         for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                            if (doc.getType() == DocumentChange.Type.ADDED) {
-
-                                String articleID = doc.getDocument().getId();
-                                Article article = doc.getDocument().toObject(Article.class).withId(articleID, i);
-                                if(article.getType().matches("necessary")){
-                                    listArticles.put(i, article);
-                                    i++;
-                                    articleRecycler.userID=userID1;
-                                    articleRecycler.notifyDataSetChanged();
-
-                                }
-
+                            String articleID = doc.getDocument().getId();
+                            Article article = doc.getDocument().toObject(Article.class).withId(articleID, i);
+                            switch (doc.getType()){
+                                case ADDED:
+                                     if(article.getType().matches("necessary")){
+                                         Log.i("Necessary", "Added");
+                                        listArticles.put(i, article);
+                                        i++;
+                                        articleRecycler.userID=userID1;
+                                        articleRecycler.notifyDataSetChanged();
+                                    }
+                                    break;
+                                case REMOVED:
+                                    Log.i("Necessary", "REMOVED");
+                                    break;
+                                case MODIFIED:
+                                    if(!article.getType().matches("necessary")) {
+                                        Log.i("Necessary", "MODIFIED");
+                                        listArticles.remove(article);
+                                        articleRecycler.userID = userID1;
+                                        //ostaje refresh prikaza!!!!
+                                        articleRecycler.notifyItemRemoved(article.id);
+                                        articleRecycler.notifyItemRangeChanged(article.id, listArticles.size());
+                                        articleRecycler.notifyDataSetChanged();
+                                        break;
+                                    }
                             }
                         }
                     }
                 });
 
 
+        //dodavanje potrebnog artikla
         final Map<String, String> articleForAdd = new HashMap<>();
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -199,26 +223,31 @@ public class NecessaryFragment extends Fragment {
                 else
                     articleForAdd.put("value", listOfValue.get("default"));
 
-                String tmp = getNewID();
+                String tmp = getNewID(); //////////////////////////PREPRAVITI FUNKCIJU ZA ID!
+
 
                 firebaseFirestore.collection("Users/" + userID1 + "/Articles").document(tmp).set(articleForAdd)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-
+                                Log.i("Necessary", "Dodavanje uspesno");
+                                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                                fragmentManager.beginTransaction()
+                                        .replace(R.id.nav_main, new NecessaryFragment())
+                                        .commit();
                             }
-                        });
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.i("Necessary", "Greska prilikom dodavanja");
+                            }
+                });
 
                 relAddArticle.setVisibility(View.INVISIBLE);
                 linearLayout2.setVisibility(View.INVISIBLE);
                 linearLayout3.setVisibility(View.INVISIBLE);
                 relLayoutActive=false;
-
-
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, new NecessaryFragment())
-                        .commit();
             }
         });
 
@@ -236,5 +265,8 @@ public class NecessaryFragment extends Fragment {
         }
         return randomStringBuilder.toString();
     }
+
+
+
 
 }

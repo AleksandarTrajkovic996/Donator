@@ -1,12 +1,14 @@
 package com.arteam.donator;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
@@ -21,8 +23,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,6 +41,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -173,8 +179,10 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     @Override
     public ArticleRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = null;
+
         listPomOne = new HashMap<Integer, Article>();
         listArticlesForOffer = new HashMap<Integer, Article>();
+
         if(type.matches("donate")) {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data_article, viewGroup, false);
             context = viewGroup.getContext();
@@ -206,21 +214,32 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
 
 
         holder.setTxtDisplay(name, size);
-
-        if (!list.get(position).getType().matches("necessary")) {
-            storageReference.child("article_images/" + articleId).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
-                    byte[] bytesImg = bytes;
-                    if (bytes != null) {
-                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        holder.imageViewArticle.setImageBitmap(bm);
-                    } else {
-                        holder.imageViewArticle.setImageResource(R.drawable.hand_heart_donate_icon);
-                    }
-                }
-            });
-        }
+//
+//        if (!list.get(position).getType().matches("necessary")) {
+//
+//            storageReference.child("article_images/" + articleId)
+//                    .getDownloadUrl()
+//                    .addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//                            Log.i("ArticleRec", "Neuspesno ucitavanje slike");
+//                        }
+//                    })
+//                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                        @Override
+//                        public void onSuccess(Uri uri) {
+//                            if (uri!=null) {
+//                                Bitmap bitmap = null;
+//                                try {
+//                                    bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                 holder.imageViewArticle.setImageBitmap(bitmap);
+//                            }
+//                        }
+//                    });;
+//        }
 
         //ovako zabranjujemo kliktanje na artikle kad je otvoren fab
 
@@ -246,9 +265,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
 
                                                     Article article = task.getResult().toObject(Article.class);
                                                     listPomOne.put(0, article);
-                                                    //     txtName.setText(article.getName());
-                                                    //     txtSize.setText(article.getSize());
-                                                    //     txtDescription.setText(article.getDescription());
 
                                                     txtDescription2.setText(article.getDescription());
 
@@ -256,23 +272,11 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                                     linearLayout4.setVisibility(View.VISIBLE);
                                                     linearLayout5.setVisibility(View.INVISIBLE);
                                                     relViewLayoutActive = true;
-                                                    //      txtName.setEnabled(false);
-                                                    //      txtSize.setEnabled(false);
                                                     txtDescription2.setEnabled(false);
-
-
-                                                } else {
-
                                                 }
-
-                                            } else {
-
                                             }
-
-
                                         }
                                     });
-
 
                             btnAsk.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -340,8 +344,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                         imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
                                         imageViewDonate.setEnabled(true);
                                     }
-                                    //         txtName.setEnabled(true);
-                                    //         txtSize.setEnabled(true);
                                     txtDescription2.setEnabled(true);
                                     relViewArticle.setVisibility(View.INVISIBLE);
                                     linearLayout4.setVisibility(View.INVISIBLE);
@@ -360,8 +362,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                         imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
                                         imageViewDonate.setEnabled(true);
                                     }
-                                    //         txtName.setEnabled(true);
-                                    //         txtSize.setEnabled(true);
                                     txtDescription2.setEnabled(true);
                                     relViewArticle.setVisibility(View.INVISIBLE);
                                     linearLayout4.setVisibility(View.INVISIBLE);
@@ -388,10 +388,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                                 if (task.getResult().exists()) {
 
                                                     Article article = task.getResult().toObject(Article.class);
-
-                                                    //     txtName.setText(article.getName());
-                                                    //     txtSize.setText(article.getSize());
-                                                    //     txtDescription.setText(article.getDescription());
                                                     listPomOne.put(0, article);
 
                                                     txtDescription2.setText(article.getDescription());
@@ -400,18 +396,9 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                                     linearLayout4.setVisibility(View.VISIBLE);
                                                     linearLayout5.setVisibility(View.INVISIBLE);
                                                     relViewLayoutActive = true;
-                                                    //      txtName.setEnabled(false);
-                                                    //      txtSize.setEnabled(false);
                                                     txtDescription2.setEnabled(false);
-                                                } else {
-
                                                 }
-
-                                            } else {
-
                                             }
-
-
                                         }
                                     });
 
@@ -447,8 +434,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                         imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
                                         imageViewDonate.setEnabled(true);
                                     }
-                                    //         txtName.setEnabled(true);
-                                    //         txtSize.setEnabled(true);
                                     txtDescription2.setEnabled(true);
                                     relViewArticle.setVisibility(View.INVISIBLE);
                                     linearLayout4.setVisibility(View.INVISIBLE);
@@ -477,33 +462,19 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                                 if (task.getResult().exists()) {
 
                                                     Article article = task.getResult().toObject(Article.class);
-
-                                                    //     txtName.setText(article.getName());
-                                                    //     txtSize.setText(article.getSize());
-                                                    //     txtDescription.setText(article.getDescription());
-
                                                     txtDescription2.setText(article.getDescription());
 
                                                     relViewArticle.setVisibility(View.VISIBLE);
                                                     linearLayout4.setVisibility(View.INVISIBLE);
                                                     linearLayout5.setVisibility(View.VISIBLE);
                                                     relViewLayoutActive = true;
-                                                    //      txtName.setEnabled(false);
-                                                    //      txtSize.setEnabled(false);
                                                     txtDescription2.setEnabled(false);
 
 
                                                     //novo:
                                                     fab.setEnabled(false);
-                                                } else {
-
                                                 }
-
-                                            } else {
-
                                             }
-
-
                                         }
                                     });
 
@@ -515,22 +486,17 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
                                         imageViewDonate.setImageResource(R.drawable.hand_heart_donate_icon);
                                         imageViewDonate.setEnabled(true);
                                     }
-                                    //         txtName.setEnabled(true);
-                                    //         txtSize.setEnabled(true);
                                     txtDescription2.setEnabled(true);
                                     relViewArticle.setVisibility(View.INVISIBLE);
                                     linearLayout4.setVisibility(View.INVISIBLE);
                                     linearLayout5.setVisibility(View.INVISIBLE);
                                     relViewLayoutActive = false;
 
-
                                     //novo:
                                     fab.setEnabled(true);
                                 }
                             });
-
                         }
-
                     }
                 }
             }
@@ -620,9 +586,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
         }
     }
 
-
-
-
     @Override
     public int getItemCount() {
         return list.size();
@@ -641,7 +604,6 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-
 
         private TextView txtDisplayName;
         private View view;

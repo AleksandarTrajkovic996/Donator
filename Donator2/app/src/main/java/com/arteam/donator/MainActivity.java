@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
                             {
                                 if(task.getResult().exists()) {//postoji user, ima osnovne podatke
 
+                                    Intent service = new Intent(MainActivity.this, MainService.class);
+                                    startService(service);
                                     startActivity(new Intent(MainActivity.this, NavigationMainActivity.class));
                                     finish();
                                     }

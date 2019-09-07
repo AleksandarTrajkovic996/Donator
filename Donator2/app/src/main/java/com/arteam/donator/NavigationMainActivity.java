@@ -8,6 +8,7 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,6 +73,7 @@ public class NavigationMainActivity extends AppCompatActivity
         emailNavigationMain = hView.findViewById(R.id.emailNavigationMainTxt);
         profileImage = hView.findViewById(R.id.imageViewNavigationMainProfil);
 
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -117,18 +120,24 @@ public class NavigationMainActivity extends AppCompatActivity
                     }
                 });
 
-        storageReference.child("profile_images/" + userID).getBytes(Long.MAX_VALUE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                bytesImg = bytes;
-                Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                DisplayMetrics dm = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(dm);
-                profileImage.setImageBitmap(bm);
-            }
-        }) ;
 
-
+        storageReference.child("profile_images/" + userID).getBytes(Long.MAX_VALUE)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(), "Something's wrong with loading the image!", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        bytesImg = bytes;
+                        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        DisplayMetrics dm = new DisplayMetrics();
+                        getWindowManager().getDefaultDisplay().getMetrics(dm);
+                        profileImage.setImageBitmap(bm);
+                    }
+        });
 
     }
 
@@ -154,7 +163,6 @@ public class NavigationMainActivity extends AppCompatActivity
         return centerRadius;
     }
 
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -177,7 +185,7 @@ public class NavigationMainActivity extends AppCompatActivity
                     .commit();
         } else if (id == R.id.nav_donate) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.nav_main, new DonateFragment())
+                    .replace(R.id.nav_main, new DonateFragment(), "Donate_Fragment_TAG")
                     .commit();
         } else if (id == R.id.nav_necessary) {
             fragmentManager.beginTransaction()

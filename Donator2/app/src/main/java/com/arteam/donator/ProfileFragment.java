@@ -19,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.method.ScrollingMovementMethod;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,10 +34,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -45,10 +51,13 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.w3c.dom.Text;
 
 import java.io.IOException;
+
+import static android.support.constraint.Constraints.TAG;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener, View.OnKeyListener {
 
@@ -181,7 +190,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, donateFragment)
+                        .replace(R.id.nav_main, donateFragment, "Donate_Fragment_TAG")
                         .commit();
                 navigationView.setCheckedItem(R.id.nav_donate);
             }
@@ -233,7 +242,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, donateFragment)
+                        .replace(R.id.nav_main, donateFragment, "Donate_Fragment_TAG")
                         .commit();
                 navigationView.setCheckedItem(R.id.nav_donate);
             }
@@ -258,7 +267,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 fragmentManager.beginTransaction()
-                        .replace(R.id.nav_main, donateFragment)
+                        .replace(R.id.nav_main, donateFragment, "Donate_Fragment_TAG")
                         .commit();
                 navigationView.setCheckedItem(R.id.nav_donate);
             }
@@ -332,15 +341,24 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
         if(imageUri != null)
         {
-            final ProgressDialog progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setTitle("Uploading...");
-            progressDialog.show();
-            
             StorageReference ref = storageReference.child("profile_images/"+ mAuth.getCurrentUser().getUid());
-            ref.putFile(imageUri);
+            UploadTask uploadTask = ref.putFile(imageUri);
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.i("Profile", "Neuspesno");
+                    Toast.makeText(getActivity(), "Something is wrong, try again to add photo!", Toast.LENGTH_SHORT).show();
+                }
+            });
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Log.i("Profile", "Uspesno dodata slika");
+                }
+            });
+
         }
-
-
     }
 
     private void pickFromGallery(){
@@ -350,41 +368,46 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         String[] mimeTypes = {"image/jpeg", "image/png"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES,mimeTypes);
         startActivityForResult(intent,1000);
-
     }
 
     private void fillData(String user_id){
 
-            firebaseFirestore.collection("Users").document(user_id).get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-
-                    if(task.isSuccessful()){
-
-                        if(task.getResult().exists()){
-
-                            User user = task.getResult().toObject(User.class);
-
+            firebaseFirestore.collection("Users").document(user_id)
+                    .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                        @Override
+                        public void onEvent(@javax.annotation.Nullable DocumentSnapshot documentSnapshot, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                            User user = documentSnapshot.toObject(User.class);
                             firstName.setText(user.getFirst_name());
                             lastName.setText(user.getLast_name());
                             address.setText(user.getAddress());
                             phoneNumber.setText(user.getPhone_number());
                             numberPoints.setText(user.getPoints());
-
-                        }else{
-                            Toast.makeText(getActivity(), R.string.error, Toast.LENGTH_SHORT).show();
                         }
-                    }
-                }
-            });
+
+                    });
 
             firebaseFirestore.collection("Users/" + user_id + "/Articles").whereEqualTo("type", "donated")
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-                            int i = queryDocumentSnapshots.size();
-                            numberDonatedProducts.setText(String.valueOf(i));
+                            int i = 0;
+                                for (DocumentChange dc : queryDocumentSnapshots.getDocumentChanges()) {
+                                    switch (dc.getType()) {
+                                        case ADDED:
+                                            i = queryDocumentSnapshots.size();
+                                            numberDonatedProducts.setText(String.valueOf(i));
+                                            break;
+                                        case MODIFIED:
+                                            i = queryDocumentSnapshots.size();
+                                            numberDonatedProducts.setText(String.valueOf(i));
+                                            break;
+                                        case REMOVED:
+                                            i = 0;
+                                            numberDonatedProducts.setText(String.valueOf(i));
+                                            break;
+                                    }
+
+                            }
                         }
                     });
 
@@ -392,8 +415,24 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-                        int i = queryDocumentSnapshots.size();
-                        numberReceivedProducts.setText(String.valueOf(i));
+                        int i = 0;
+                        for (DocumentChange dc : queryDocumentSnapshots.getDocumentChanges()) {
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    i = queryDocumentSnapshots.size();
+                                    numberReceivedProducts.setText(String.valueOf(i));
+                                    break;
+                                case MODIFIED:
+                                    i = queryDocumentSnapshots.size();
+                                    numberReceivedProducts.setText(String.valueOf(i));
+                                    break;
+                                case REMOVED:
+                                    i = 0;
+                                    numberReceivedProducts.setText(String.valueOf(i));
+                                    break;
+                            }
+
+                        }
                     }
                 });
 
@@ -401,8 +440,24 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-                            int i = queryDocumentSnapshots.size();
-                            numberDonateProducts.setText(String.valueOf(i));
+                            int i = 0;
+                            for (DocumentChange dc : queryDocumentSnapshots.getDocumentChanges()) {
+                                switch (dc.getType()) {
+                                    case ADDED:
+                                        i = queryDocumentSnapshots.size();
+                                        numberDonateProducts.setText(String.valueOf(i));
+                                        break;
+                                    case MODIFIED:
+                                        i = queryDocumentSnapshots.size();
+                                        numberDonateProducts.setText(String.valueOf(i));
+                                        break;
+                                    case REMOVED:
+                                        i = 0;
+                                        numberDonateProducts.setText(String.valueOf(i));
+                                        break;
+                                }
+
+                            }
                         }
                     });
 
@@ -410,8 +465,24 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-                            int i = queryDocumentSnapshots.size();
-                            numberNecessaryProducts.setText(String.valueOf(i));
+                            int i = 0;
+                            for (DocumentChange dc : queryDocumentSnapshots.getDocumentChanges()) {
+                                switch (dc.getType()) {
+                                    case ADDED:
+                                        i = queryDocumentSnapshots.size();
+                                        numberNecessaryProducts.setText(String.valueOf(i));
+                                        break;
+                                    case MODIFIED:
+                                        i = queryDocumentSnapshots.size();
+                                        numberNecessaryProducts.setText(String.valueOf(i));
+                                        break;
+                                    case REMOVED:
+                                        i = 0;
+                                        numberNecessaryProducts.setText(String.valueOf(i));
+                                        break;
+                                }
+
+                            }
                         }
                     });
     }

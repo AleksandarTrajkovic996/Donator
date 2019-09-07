@@ -82,6 +82,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private EditText searchBar;
     private LatLng centerRadius = null;
     private User userMAIN;
+
     private String clickedArticleId ="";
     private String clickedUserID = "";
     private String clickedArticleName = "";
@@ -169,8 +170,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 }else{
                     Toast.makeText(getActivity(), "You have to choose one article!", Toast.LENGTH_SHORT).show();
                 }
-                constraintBigMap.setVisibility(View.INVISIBLE);
-                linearLayoutScrol.removeAllViews();
                 clickedArticleId="";
                 clickedUserID = "";
             }
@@ -199,7 +198,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                              && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                          mLocationPermissionGranted = true;
-                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
+                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 7));
 
                      }
                  }
@@ -217,10 +216,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_ACCES_FINE_LOCATION);
 
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 7));
 
         } else {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 10));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(centerRadius, 7));
         }
     }
 
@@ -233,35 +232,48 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                         @Override
                         public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
                             int i = 0;
+                            refresh();
                             for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) { //foreach petlja kroz Users
 
-                                if (doc.getType() == DocumentChange.Type.ADDED) {
+                                final String userID = doc.getDocument().getId();
+                                final User user1 = doc.getDocument().toObject(User.class).withId(userID, i);
+                                ++i;
 
-                                    final String userID = doc.getDocument().getId();
-                                    final User user1 = doc.getDocument().toObject(User.class).withId(userID, i);
-                                    ++i;
+                                if (userID.matches(mAuth.getCurrentUser().getUid()))
+                                    continue; //trebalo bi da preskoci trenutnu iteraciju i nastavi sa sledecom
 
-                                    if (!userID.matches(mAuth.getCurrentUser().getUid())) {
+                                if (searchingForType.matches("donate") || (searchingForType.matches("necessary") && isThere(data))) {
 
-                                        if (searchingForType.matches("donate") || (searchingForType.matches("necessary") && isThere(data))) {
+                                    firebaseFirestore.collection("Users/" + userID + "/Articles").whereEqualTo("type", SearchingFor).whereEqualTo("name", data)
+                                            .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                                @Override
+                                                public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                                                    int con = queryDocumentSnapshots.size();
 
-                                            firebaseFirestore.collection("Users/" + userID + "/Articles").whereEqualTo("type", SearchingFor).whereEqualTo("name", data)
-                                                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                                        @Override
-                                                        public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
-
-                                                            int con = queryDocumentSnapshots.size();
-                                                            if (con > 0) {
-                                                                addMarker(user1);
-                                                            }
-                                                                                                                   }
-                                                    });
-                                        }
-                                    }
+                                                    for (DocumentChange d : queryDocumentSnapshots.getDocumentChanges()) {
+                                                        switch (d.getType()) {
+                                                            case ADDED:
+                                                                if (con > 0) {
+                                                                    Log.i("Type", "Added");
+                                                                    addMarker(user1);
+                                                                }
+                                                                break;
+                                                            case REMOVED:
+                                                                Log.i("Type", "Removed");
+                                                                removeMarker(user1);
+                                                                break;
+                                                            case MODIFIED:
+                                                                Log.i("Type", "Modified");
+                                                                break;
+                                                        }
+                                                    }
+                                                }
+                                            });
                                 }
                             }
                         }
                     });
+
     }
 
     private boolean isThere(String data){
@@ -410,6 +422,18 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
+    private void removeMarker(User u) {
+        Marker m = null;
+        for (Map.Entry<Marker, String> entry : markerPlaceIdMap.entrySet()) {
+            if (entry.getValue().matches(u.userID)) {
+                m = entry.getKey();
+            }
+        }
+        if (m != null) {
+            m.remove();
+        }
+    }
+
     public void setUser(User u) {this.userMAIN = u;}
 
     public void setLatLnt(LatLng l) { this.centerRadius = l; }
@@ -467,6 +491,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private void showArticles(final List<Article> articles){
 
+        linearLayoutScrol.removeAllViews();
         if(constraintBigMap.getVisibility() == View.INVISIBLE) {
             for (int i = 0; i < articles.size(); ++i) {
                 String ID_1 = articles.get(i).articleID;
