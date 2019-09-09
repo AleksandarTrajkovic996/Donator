@@ -8,12 +8,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,6 +22,13 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -56,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static android.support.constraint.Constraints.TAG;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
@@ -297,7 +297,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                         int i = 0;
                         for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
                             if (doc.getType() == DocumentChange.Type.ADDED) {
-
                                 String articleID = doc.getDocument().getId();
                                 Article article = doc.getDocument().toObject(Article.class).withId(articleID, i);
                                 if(article.getType().matches("necessary")){
@@ -482,7 +481,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                             articleListCallback.onCallback(tmp);
                             // countDownLatch.countDown();
                         } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
+                            Log.d("MAPS", "Error getting documents: ", task.getException());
+
                         }
                     }
                 });

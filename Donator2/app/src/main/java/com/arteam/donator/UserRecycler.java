@@ -2,21 +2,25 @@ package com.arteam.donator;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Map;
@@ -27,17 +31,18 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
     private Context context;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
-
-
     private Map<Integer,User> list;
     private Map<Integer,User> list2;
+    private String rang;
 
     public UserRecycler (Map<Integer, User> map){
         this.list = map;
+        this.rang = null;
     }
-    public UserRecycler (Map<Integer, User> map, Map<Integer, User> map2){
+
+    public UserRecycler (Map<Integer, User> map, String rang){
         this.list = map;
-        this.list2 = map2;
+        this.rang = rang;
     }
 
     @NonNull
@@ -45,7 +50,6 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
     public UserRecycler.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_data_user, viewGroup, false);
         context = viewGroup.getContext();
-
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
 
@@ -53,17 +57,48 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UserRecycler.ViewHolder holder, int i) {
+    public void onBindViewHolder(@NonNull final UserRecycler.ViewHolder holder, int i) {
         final String userId = list.get(i).userID;
 
         final String first_name = list.get(i).getFirst_name();
         final String last_name = list.get(i).getLast_name();
         final String points = list.get(i).getPoints();
 
+        holder.setTxtDisplay(points, first_name + " "+ last_name);
 
-        holder.setTxtDisplay(first_name, last_name + ", " + points);
+        if(rang!=null && rang.matches("Y")){ //znaci da je pozvan za sortiranje
+            if(i==0){
+                holder.rankingImageView.setImageResource(R.drawable.gold_medal);
+            }else if(i==1){
+                holder.rankingImageView.setImageResource(R.drawable.silver_medal);
+            }else if(i==2){
+                holder.rankingImageView.setImageResource(R.drawable.bronze_medal);
+            }
+        }
 
-        holder.one_data_user.setOnClickListener(new View.OnClickListener() {
+        FirebaseSingleton.getInstance().storageReference
+                .child("profile_images/" + userId)
+                .getDownloadUrl()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("UserRecycler", "Download failed!");
+                        holder.profileImageView.setImageResource(R.drawable.profile);
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Log.i("UserRecycler", "Profilna slika skinuta!");
+                        if (uri != null) {
+                            Glide.with(context)
+                                    .load(uri)
+                                    .into(holder.profileImageView);
+                        }
+                    }
+        });
+
+        holder.linUser.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -90,25 +125,30 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView txtDisplay;
         private View view;
-        private TextView one_data_user;
 
+        private ImageView profileImageView;
+        private ImageView rankingImageView;
+        private TextView userName;
+        private TextView userPoints;
+        private LinearLayout linUser;
 
         @SuppressLint("ResourceType")
         public ViewHolder(View itemView) {
             super(itemView);
 
             view = itemView;
-            one_data_user = (TextView) view.findViewById(R.id.txtDisplay);
+            profileImageView = view.findViewById(R.id.user_profile);
+            rankingImageView = view.findViewById(R.id.ranking_image);
+            userName = view.findViewById(R.id.userName);
+            userPoints = view.findViewById(R.id.userPoints);
+            linUser = view.findViewById(R.id.linUser);
         }
 
 
-            public void setTxtDisplay (String txt, String txt2){
-
-            txtDisplay = view.findViewById(R.id.txtDisplay);
-
-            txtDisplay.setText(txt + " " + txt2);
+            public void setTxtDisplay (String txtPoints, String txtName){
+                userPoints.setText(txtPoints);
+                userName.setText(txtName);
         }
     }
 }

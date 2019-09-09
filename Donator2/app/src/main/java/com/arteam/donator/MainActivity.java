@@ -1,11 +1,16 @@
 package com.arteam.donator;
 
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -19,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
 
+    private Intent serviceIntent;
+    private NecessaryArticlesService service;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +34,19 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         firebaseFirestore = FirebaseFirestore.getInstance();
+
+        serviceIntent = new Intent(this, NecessaryArticlesService.class);
+        service = new NecessaryArticlesService();
+//
+//        if(!isMyServiceRunning(service.getClass())){
+//            getApplicationContext().startService(serviceIntent);
+//        }
+
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(serviceIntent);
+//        }else{
+//            getApplicationContext().startService(serviceIntent);
+//        }
 
     }
 
@@ -53,9 +74,6 @@ public class MainActivity extends AppCompatActivity {
                             if(task.isSuccessful())
                             {
                                 if(task.getResult().exists()) {//postoji user, ima osnovne podatke
-
-                                    Intent service = new Intent(MainActivity.this, MainService.class);
-                                    startService(service);
                                     startActivity(new Intent(MainActivity.this, NavigationMainActivity.class));
                                     finish();
                                     }
@@ -78,7 +96,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                Log.i ("Service status", "Running");
+                return true;
+            }
+        }
+        Log.i ("Service status", "Not running");
+        return false;
+    }
 
-
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }

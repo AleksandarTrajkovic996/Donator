@@ -1,7 +1,9 @@
 package com.arteam.donator;
 
-import com.google.firebase.database.Exclude;
-import com.google.firebase.database.annotations.NotNull;
+
+import com.google.firebase.firestore.Exclude;
+
+import org.jetbrains.annotations.NotNull;
 
 public class RequestID {
 

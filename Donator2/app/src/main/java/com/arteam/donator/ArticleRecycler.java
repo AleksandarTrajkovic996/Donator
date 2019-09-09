@@ -1,21 +1,10 @@
 package com.arteam.donator;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -23,46 +12,41 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.annotation.Nullable;
 
-import static android.support.constraint.Constraints.TAG;
 
 public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHolder> {
 
     private Context context;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
-
+    private final String TAG = "Article";
 
     private Map<Integer,Article> list;
     private Map<Integer,Article> listPomOne;//samo jedan element ce biti tu uvek
     private Map<Integer, Article> listArticlesForOffer;
-    private RelativeLayout relativeLayout;
+    private ConstraintLayout relativeLayout;
     private TextView txtName;
     private TextView txtSize;
     private TextView txtDescription;
@@ -80,7 +64,7 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     public ArrayList<Article> tmp;
 
     //u DonateFragment objasnjeno cemu sta sluzi
-    private RelativeLayout relViewArticle;
+    private ConstraintLayout relViewArticle;
     private LinearLayout linearLayout4;
     private LinearLayout linearLayout5;
     private Button btnCancel2;
@@ -94,29 +78,9 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     private FirebaseStorage storage;
     private StorageReference storageReference;
 
-    public ArticleRecycler(ImageView imageDonate, Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3, String type) {
-
-        this.mAuth = FirebaseAuth.getInstance();
-        this.imageUri = null;
-        this.imageViewDonate = imageDonate;
-        this.list = listArticles;
-        this.relativeLayout = relAddArticle;
-        this.txtName = txtName;
-        this.txtSize = txtSize;
-        this.txtDescription = txtDescription;
-        this.btnOk = btnOk;
-        this.btnOk2 = btnOk2;
-        this.btnCancel = btnCancel;
-        this.relLayoutActive = false;
-        this.linearLayout3 = lin3;
-        this.linearLayout2 = lin2;
-        this.fab = fab;
-        this.type = type;
-    }
-
     //poziva se iz NecessaryFragment
-    public ArticleRecycler(Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3,
-                           RelativeLayout relViewArticle, LinearLayout linearLayout4, LinearLayout linearLayout5, Button btnOffer, Button btnOk3, Button btnCancel2, TextView txtDescription2, String type) {
+    public ArticleRecycler(Map<Integer, Article> listArticles, ConstraintLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3,
+                           ConstraintLayout relViewArticle, LinearLayout linearLayout4, LinearLayout linearLayout5, Button btnOffer, Button btnOk3, Button btnCancel2, TextView txtDescription2, String type) {
 
         this.mAuth = FirebaseAuth.getInstance();
         this.list = listArticles;
@@ -145,8 +109,8 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
     }
 
     //poziva se iz DonateFragment
-    public ArticleRecycler(ImageView imageDonate, Map<Integer, Article> listArticles, RelativeLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3,
-                           RelativeLayout relViewArticle, LinearLayout linearLayout4, LinearLayout linearLayout5, Button btnAsk, Button btnOk3, Button btnCancel2, TextView txtDescription2, String type) {
+    public ArticleRecycler(ImageView imageDonate, Map<Integer, Article> listArticles, ConstraintLayout relAddArticle, TextView txtName, TextView txtSize, TextView txtDescription, Button btnOk, Button btnOk2, Button btnCancel, FloatingActionButton fab, LinearLayout lin2, LinearLayout lin3,
+                           ConstraintLayout relViewArticle, LinearLayout linearLayout4, LinearLayout linearLayout5, Button btnAsk, Button btnOk3, Button btnCancel2, TextView txtDescription2, String type) {
 
         this.mAuth = FirebaseAuth.getInstance();
         this.imageUri = null;
@@ -214,32 +178,31 @@ public class ArticleRecycler extends RecyclerView.Adapter<ArticleRecycler.ViewHo
 
 
         holder.setTxtDisplay(name, size);
-//
-//        if (!list.get(position).getType().matches("necessary")) {
-//
-//            storageReference.child("article_images/" + articleId)
-//                    .getDownloadUrl()
-//                    .addOnFailureListener(new OnFailureListener() {
-//                        @Override
-//                        public void onFailure(@NonNull Exception e) {
-//                            Log.i("ArticleRec", "Neuspesno ucitavanje slike");
-//                        }
-//                    })
-//                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                        @Override
-//                        public void onSuccess(Uri uri) {
-//                            if (uri!=null) {
-//                                Bitmap bitmap = null;
-//                                try {
-//                                    bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                 holder.imageViewArticle.setImageBitmap(bitmap);
-//                            }
-//                        }
-//                    });;
-//        }
+
+        if (!list.get(position).getType().matches("necessary")) {
+
+            storageReference.child("article_images/" + articleId)
+                    .getDownloadUrl()
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i("ArticleRec", "Neuspesno ucitavanje slike");
+                            holder.imageViewArticle.setImageResource(R.drawable.hand_heart_donate_icon);
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            Log.i("ArticleRec", "Slika artikla je null!");
+                            if (uri!=null) {
+                               Log.i("ArticleRec", "Slika artikla skinuta!");
+                               Glide.with(context)
+                                       .load(uri)
+                                       .into(holder.imageViewArticle);
+                            }
+                        }
+                    });;
+        }
 
         //ovako zabranjujemo kliktanje na artikle kad je otvoren fab
 

@@ -2,15 +2,16 @@ package com.arteam.donator;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -31,8 +32,6 @@ import java.util.Map;
 import java.util.Random;
 
 import javax.annotation.Nullable;
-
-import static android.support.constraint.Constraints.TAG;
 
 public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHolder> {
 
@@ -299,7 +298,7 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
 
                                 userCallback.onCallback(usr);
                             } else {
-                                Log.d(TAG, "Error getting documents: ", task.getException());
+                                Log.d("Req", "Error getting documents: ", task.getException());
                             }
                         }
                     });

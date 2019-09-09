@@ -2,15 +2,7 @@ package com.arteam.donator;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,9 +11,20 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
@@ -33,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+
 public class NecessaryFragment extends Fragment {
 
     View view;
@@ -42,7 +46,7 @@ public class NecessaryFragment extends Fragment {
     private RecyclerView recyclerView;
     private Map<Integer, Article> listArticles;
     private ArticleRecycler articleRecycler;
-    private RelativeLayout relAddArticle;
+    private ConstraintLayout relAddArticle;
     private LinearLayout linearLayout2;
     private LinearLayout linearLayout3;
     private Button btnOk;
@@ -63,8 +67,7 @@ public class NecessaryFragment extends Fragment {
     private TextView txtDescription2;
     private LinearLayout linearLayout4;
     private LinearLayout linearLayout5;
-    private RelativeLayout relViewArticle;
-
+    private ConstraintLayout relViewArticle;
 
     @SuppressLint("RestrictedApi")
     @Nullable
@@ -249,6 +252,8 @@ public class NecessaryFragment extends Fragment {
                 linearLayout3.setVisibility(View.INVISIBLE);
                 relLayoutActive=false;
             }
+
+
         });
 
         return view;
