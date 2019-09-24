@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
@@ -19,13 +20,17 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +44,13 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
     private Context context;
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
+
+    private static final String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private static final String CHAR_UPPER = CHAR_LOWER.toUpperCase();
+    private static final String NUMBER = "0123456789";
+
+    private static final String DATA_FOR_RANDOM_STRING = CHAR_LOWER + CHAR_UPPER + NUMBER;
+    private static SecureRandom random = new SecureRandom();
 
 
     public String userID = null;
@@ -68,19 +80,27 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
     @Override
     public void onBindViewHolder(@NonNull RequestRecycler.ViewHolder holder, final int position) {
 
-        final String name = listA.get(position).getName();
-        final String size = listA.get(position).getSize();
-        final String desc = listA.get(position).getDescription();
-        final String typeArticle = listA.get(position).getType();
-        final String articleId = listA.get(position).articleID;
-        final String value = listA.get(position).getValue();
+        Article articleTmp = listA.get(position);
+
+        final String name = articleTmp.getName();
+        final String size = articleTmp.getSize();
+        final String desc = articleTmp.getDescription();
+        final String typeArticle = articleTmp.getType();
+        final String articleId = articleTmp.articleID;
+        final String value = articleTmp.getValue();
 
         final String typeRequest = list.get(position).getType();
         final String fromId = list.get(position).getFromID();
         final String requestId = list.get(position).requestID;
 
+
         holder.setTxtDisplay(name, size);
 
+        if(typeRequest.matches("active-ask")){
+            holder.setBtnText("ACCEPT REQUEST");
+        }else if(typeRequest.matches("active-offer")){
+            holder.setBtnText("ACCEPT OFFER");
+        }
 
         holder.btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,7 +108,7 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
                 firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Requests").document(requestId)
                         .update("type", "passive");
 
-                String tmp = getNewID();
+                String tmp = generateRandomString(8);
 
                 if (typeRequest.matches("active-ask")){//nesto mi traze
 
@@ -108,7 +128,9 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
 
                     //necessary->received
                     firebaseFirestore.collection("Users/" + fromId + "/Articles")
-                            .whereEqualTo("name", name).whereEqualTo("size", size).whereEqualTo("type", "necessary")
+                            .whereEqualTo("name", name)
+                            .whereEqualTo("size", size)
+                            .whereEqualTo("type", "necessary")
                             .get()
                             .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
@@ -124,8 +146,6 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
                                     }
                                 }
                             });
-
-
 
                     final Map<String, String> notificationOffer = new HashMap<>();
                     notificationOffer.put("text", "Potrazivanje prihvaceno");
@@ -251,31 +271,23 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
                         .update("type", "passive");
 
 
-                String tmp = getNewID();
+                String tmp = generateRandomString(8);
 
                 if (typeRequest.matches("active-ask")) {
                     final Map<String, String> notificationOffer = new HashMap<>();
-                    notificationOffer.put("text", "Potrazivanjenja odbijeno");
+                    String msg = "Your request for item '" + name +"' was denied.";
+                    notificationOffer.put("text", msg);
 
-                    firebaseFirestore.collection("Users/" + fromId + "/Notifications").document(tmp).set(notificationOffer)
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
+                    firebaseFirestore.collection("Users/" + fromId + "/Notifications").document(tmp).set(notificationOffer);
 
-                                }
-                            });
                 }
                 else{//active-offer
                     final Map<String, String> notificationOffer = new HashMap<>();
-                    notificationOffer.put("text", "Ponuda odbijena");
+                    String msg = "Your offer for item '" + name +"' was denied.";
+                    notificationOffer.put("text", msg);
 
-                    firebaseFirestore.collection("Users/" + fromId + "/Notifications").document(tmp).set(notificationOffer)
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
+                    firebaseFirestore.collection("Users/" + fromId + "/Notifications").document(tmp).set(notificationOffer);
 
-                                }
-                            });
                 }
                 fragmentManager.beginTransaction()
                         .replace(R.id.nav_main, new RequestFragment())
@@ -310,17 +322,26 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
             return list.size();
     }
 
-    public String getNewID(){
-        Random generator = new Random();
-        StringBuilder randomStringBuilder = new StringBuilder();
-        int randomLength = generator.nextInt((15 - 10) + 1) + 10;
-        char tempChar;
-        for (int i = 0; i < randomLength; i++){
-            tempChar = (char) (generator.nextInt(96) + 32);
-            randomStringBuilder.append(tempChar);
+    public static String generateRandomString(int length) {
+        if (length < 1) throw new IllegalArgumentException();
+
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+
+            // 0-62 (exclusive), random returns 0-61
+            int rndCharAt = random.nextInt(DATA_FOR_RANDOM_STRING.length());
+            char rndChar = DATA_FOR_RANDOM_STRING.charAt(rndCharAt);
+
+            // debug
+            System.out.format("%d\t:\t%c%n", rndCharAt, rndChar);
+
+            sb.append(rndChar);
         }
-        return randomStringBuilder.toString();
+
+        return sb.toString();
+
     }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
@@ -350,6 +371,10 @@ public class RequestRecycler extends RecyclerView.Adapter<RequestRecycler.ViewHo
 
             txtDisplaySize.setText(size);
             txtDisplayName.setText(txt);
+        }
+
+        public void setBtnText(String txt){
+            btnAccept.setText(txt);
         }
     }
 }

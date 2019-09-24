@@ -69,8 +69,8 @@
 
         <Button
             android:id="@+id/btnAcceptRequest"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginRight="8dp"
             android:background="@drawable/buttonshape"
             android:gravity="center"
@@ -81,8 +81,8 @@
 
         <Button
             android:id="@+id/btnCancelRequest"
-            android:layout_width="150dp"
-            android:layout_height="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:background="@drawable/buttonshape"
             android:gravity="center"

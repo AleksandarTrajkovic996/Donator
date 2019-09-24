@@ -1,23 +1,21 @@
 package com.arteam.donator;
 
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Intent serviceIntent;
     private NecessaryArticlesService service;
+
+    private Intent serviceLocationIntent;
+    private LocationService loactionService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,32 +38,35 @@ public class MainActivity extends AppCompatActivity {
 
         serviceIntent = new Intent(this, NecessaryArticlesService.class);
         service = new NecessaryArticlesService();
-//
-//        if(!isMyServiceRunning(service.getClass())){
-//            getApplicationContext().startService(serviceIntent);
-//        }
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            startForegroundService(serviceIntent);
-//        }else{
-//            getApplicationContext().startService(serviceIntent);
-//        }
+        serviceLocationIntent = new Intent(this, LocationService.class);
+        loactionService = new LocationService();
 
     }
 
     @Override
-    protected void onStart(){
+    protected void onStart() {
         super.onStart();
 
         FirebaseUser user = mAuth.getCurrentUser();
+        serviceIntent = new Intent(this, NecessaryArticlesService.class);
+        service = new NecessaryArticlesService();
 
-        if(user==null){ //ako ne postoji user
+        if (isMyServiceRunning(loactionService.getClass())) {
+            stopService(serviceLocationIntent);
+        }
+
+        if (isMyServiceRunning(service.getClass())) {
+            stopService(serviceIntent);
+        }
+
+        if (user == null) { //ako ne postoji user
 
             Intent i = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(i);
             finish();
 
-        }else{
+        } else {
 
             final String uID = user.getUid();
 
@@ -71,20 +75,20 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
-                            if(task.isSuccessful())
-                            {
-                                if(task.getResult().exists()) {//postoji user, ima osnovne podatke
+                            if (task.isSuccessful()) {
+                                if (task.getResult().exists()) {//postoji user, ima osnovne podatke
+
+                                    startService(serviceLocationIntent);
+                                    startService(serviceIntent);
                                     startActivity(new Intent(MainActivity.this, NavigationMainActivity.class));
                                     finish();
-                                    }
-
-                                else {//postoji user, nema nikakvih podataka o sebi
+                                } else {//postoji user, nema nikakvih podataka o sebi
                                     Intent ne = new Intent(MainActivity.this, RegisterPersonalInfoActivity.class);
                                     startActivity(ne);
                                     finish();
                                 }
 
-                            }else{
+                            } else {
 
                                 Toast.makeText(MainActivity.this, R.string.error, Toast.LENGTH_LONG).show();
                             }
@@ -112,4 +116,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
+
 }

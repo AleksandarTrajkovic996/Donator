@@ -72,7 +72,6 @@ public class RankingFragment extends Fragment {
                     l.put(j + 1, key);
                 }
                 friendsRecycler.notifyDataSetChanged();
-
             }
         });
 
@@ -91,8 +90,10 @@ public class RankingFragment extends Fragment {
                             public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
                                 int i = 0;
                                 for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+
                                     String friendID = doc.getDocument().getId();
                                     User friend = doc.getDocument().toObject(User.class).withId(friendID, i);
+
                                     switch (doc.getType()) {
                                         case REMOVED:
                                             Log.i("Ranking", "REMOVED");

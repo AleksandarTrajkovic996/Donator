@@ -11,6 +11,8 @@ public class User extends UserID implements Comparable<User> {
     private String country;
     private String phone_number;
     private String points;
+    private String latitude;
+    private String longitude;
 
     public String getPoints() {
         return points;
@@ -30,6 +32,22 @@ public class User extends UserID implements Comparable<User> {
         this.country = country;
         this.phone_number = phone_number;
         this.friendID = fID;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
     }
 
     public String getFriendID() {

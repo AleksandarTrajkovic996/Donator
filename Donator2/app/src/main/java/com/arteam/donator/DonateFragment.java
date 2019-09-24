@@ -40,6 +40,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -82,6 +83,15 @@ public class DonateFragment extends Fragment {
     private boolean relViewLayoutActive;
     private Map<String, String> listOfValue;
     private RecyclerView contentDonate;
+
+
+    private static final String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private static final String CHAR_UPPER = CHAR_LOWER.toUpperCase();
+    private static final String NUMBER = "0123456789";
+
+    private static final String DATA_FOR_RANDOM_STRING = CHAR_LOWER + CHAR_UPPER + NUMBER;
+    private static SecureRandom random = new SecureRandom();
+
 
     @SuppressLint("RestrictedApi")
     @Nullable
@@ -193,7 +203,7 @@ public class DonateFragment extends Fragment {
 
 
                 //dodavanje artikla i slike sa istim ID-em
-                String tmp = getNewID();
+                String tmp = generateRandomString(8);
                 firebaseFirestore.collection("Users/" + mAuth.getCurrentUser().getUid() + "/Articles").document(tmp).set(articleForAdd)
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -318,16 +328,24 @@ public class DonateFragment extends Fragment {
 
     }
 
-    public String getNewID(){
-        Random generator = new Random();
-        StringBuilder randomStringBuilder = new StringBuilder();
-        int randomLength = generator.nextInt((15 - 10) + 1) + 10;
-        char tempChar;
-        for (int i = 0; i < randomLength; i++){
-            tempChar = (char) (generator.nextInt(96) + 32);
-            randomStringBuilder.append(tempChar);
+    public static String generateRandomString(int length) {
+        if (length < 1) throw new IllegalArgumentException();
+
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+
+            // 0-62 (exclusive), random returns 0-61
+            int rndCharAt = random.nextInt(DATA_FOR_RANDOM_STRING.length());
+            char rndChar = DATA_FOR_RANDOM_STRING.charAt(rndCharAt);
+
+            // debug
+            System.out.format("%d\t:\t%c%n", rndCharAt, rndChar);
+
+            sb.append(rndChar);
         }
-        return randomStringBuilder.toString();
+
+        return sb.toString();
+
     }
 
     private void writeImageOnStorage(String id){

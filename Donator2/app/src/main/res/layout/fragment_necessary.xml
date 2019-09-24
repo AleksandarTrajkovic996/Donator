@@ -19,6 +19,8 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/border_light"
         android:theme="@style/Theme.AppCompat.Light.Dialog"
         android:visibility="invisible"
@@ -31,15 +33,14 @@
             android:id="@+id/txtName"
             android:layout_width="fill_parent"
             android:layout_height="40dp"
-            android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:ems="10"
+            android:gravity="center"
             android:hint="@string/Name"
             android:inputType="textPersonName"
-            android:textColor="#ffff"
             android:textColorHint="@android:color/black"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -56,9 +57,10 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:ems="10"
+            android:gravity="center"
+
             android:hint="@string/Size"
             android:inputType="textPersonName"
-            android:textColor="#ffff"
             android:textColorHint="@android:color/black"
             android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/lin2"
@@ -79,7 +81,6 @@
             android:hint="@string/Description"
             android:inputType="textMultiLine"
             android:lines="3"
-            android:textColor="#ffff"
             android:textColorHint="@android:color/black"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -96,7 +97,6 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/bottom_border"
             android:paddingLeft="4.0dip"
             android:paddingTop="5.0dip"
             android:paddingRight="4.0dip"
@@ -134,7 +134,6 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/bottom_border"
             android:gravity="center"
             android:paddingLeft="4.0dip"
             android:paddingTop="5.0dip"
@@ -157,12 +156,86 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintBigMap1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/include"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints">
+
+        <ScrollView
+            android:id="@+id/scrolMap1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                android:id="@+id/linearLayoutScrollMap1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </ScrollView>
+
+
+        <LinearLayout
+            android:id="@+id/lh1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/scrolMap1">
+
+            <Button
+                android:id="@+id/btnOfferOrAskMaps1"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/buttonshape"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="OFFER"
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/btnCancelOfferOrAskMaps1"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/buttonshape"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="@string/cancelBtn"
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/relViewArticle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/border_light"
         android:theme="@style/Theme.AppCompat.Light.Dialog"
         android:visibility="invisible"
@@ -185,7 +258,6 @@
             android:hint="@string/Description"
             android:inputType="textMultiLine"
             android:lines="3"
-            android:textColor="#ffff"
             android:textColorHint="@android:color/black"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -201,7 +273,6 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/bottom_border"
             android:orientation="horizontal"
             android:paddingLeft="4.0dip"
             android:paddingTop="5.0dip"
@@ -243,7 +314,6 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:background="@drawable/bottom_border"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="4.0dip"
@@ -281,6 +351,8 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:maxImageSize="50dp"
+        android:src="@drawable/add"
+        app:backgroundTint="@android:color/transparent"        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

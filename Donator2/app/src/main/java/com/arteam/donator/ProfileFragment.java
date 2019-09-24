@@ -33,6 +33,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -134,14 +135,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         Bundle bundle = getArguments();
         if(bundle != null) {
 
-            bytesProfile = bundle.getByteArray("profileImg");
             userID = bundle.getString("userID");
-            if(bytesProfile!=null) {
-                Bitmap bm = BitmapFactory.decodeByteArray(bytesProfile, 0, bytesProfile.length);
-                DisplayMetrics dm = new DisplayMetrics();
-                getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
-                profilePhoto.setImageBitmap(bm);
-            }
 
             if(userID!=null){
                 this.fillData(userID);
@@ -165,8 +159,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
             address.setEnabled(true);
             phoneNumber.setEnabled(true);
         }
-
-
 
         linDonate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -383,6 +375,27 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
 
                     });
 
+        storageReference.child("profile_images/" + user_id)
+                .getDownloadUrl()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("ProfileFragment", "Neuspesno ucitavanje profilne slike!");
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Log.i("ArticleRec", "Slika artikla je null!");
+                        if (uri!=null) {
+                            Log.i("ArticleRec", "Slika artikla skinuta!");
+                            Glide.with(getActivity())
+                                    .load(uri)
+                                    .into(profilePhoto);
+                        }
+                    }
+                });;
+
             firebaseFirestore.collection("Users/" + user_id + "/Articles").whereEqualTo("type", "donated")
                     .addSnapshotListener(new EventListener<QuerySnapshot>() {
                         @Override
@@ -533,6 +546,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener, V
         // Result code is RESULT_OK only if the user selects an Image
         if(resultCode == getActivity().RESULT_OK) {
             if(requestCode == 1000){
+                imageUri = null;
                 imageUri = data.getData();
                 bitmap = null;
                 try {

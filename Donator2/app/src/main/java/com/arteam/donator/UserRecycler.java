@@ -32,7 +32,6 @@ public class UserRecycler extends RecyclerView.Adapter<UserRecycler.ViewHolder> 
     private FirebaseAuth mAuth;
     private FirebaseFirestore firebaseFirestore;
     private Map<Integer,User> list;
-    private Map<Integer,User> list2;
     private String rang;
 
     public UserRecycler (Map<Integer, User> map){

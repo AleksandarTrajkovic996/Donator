@@ -32,6 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -58,6 +59,14 @@ public class NecessaryFragment extends Fragment {
     FloatingActionButton fab;
     private boolean relLayoutActive;
     private Map<String, String> listOfValue;
+
+    private static final String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private static final String CHAR_UPPER = CHAR_LOWER.toUpperCase();
+    private static final String NUMBER = "0123456789";
+
+    private static final String DATA_FOR_RANDOM_STRING = CHAR_LOWER + CHAR_UPPER + NUMBER;
+    private static SecureRandom random = new SecureRandom();
+
 
 
     private boolean relViewLayoutActive;
@@ -226,7 +235,7 @@ public class NecessaryFragment extends Fragment {
                 else
                     articleForAdd.put("value", listOfValue.get("default"));
 
-                String tmp = getNewID(); //////////////////////////PREPRAVITI FUNKCIJU ZA ID!
+                String tmp = generateRandomString(8); //////////////////////////PREPRAVITI FUNKCIJU ZA ID!
 
 
                 firebaseFirestore.collection("Users/" + userID1 + "/Articles").document(tmp).set(articleForAdd)
@@ -259,18 +268,25 @@ public class NecessaryFragment extends Fragment {
         return view;
     }
 
-    public String getNewID(){
-        Random generator = new Random();
-        StringBuilder randomStringBuilder = new StringBuilder();
-        int randomLength = generator.nextInt((15 - 10) + 1) + 10;
-        char tempChar;
-        for (int i = 0; i < randomLength; i++){
-            tempChar = (char) (generator.nextInt(96) + 32);
-            randomStringBuilder.append(tempChar);
-        }
-        return randomStringBuilder.toString();
-    }
+    public static String generateRandomString(int length) {
+        if (length < 1) throw new IllegalArgumentException();
 
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+
+            // 0-62 (exclusive), random returns 0-61
+            int rndCharAt = random.nextInt(DATA_FOR_RANDOM_STRING.length());
+            char rndChar = DATA_FOR_RANDOM_STRING.charAt(rndCharAt);
+
+            // debug
+            System.out.format("%d\t:\t%c%n", rndCharAt, rndChar);
+
+            sb.append(rndChar);
+        }
+
+        return sb.toString();
+
+    }
 
 
 

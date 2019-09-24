@@ -12,7 +12,7 @@
         android:id="@+id/listArticleRecycler"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@drawable/necessary_back"
+        android:background="@drawable/b3"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
